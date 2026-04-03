@@ -1,0 +1,303 @@
+{
+  "metadata": {
+    "id": "blog-post-writer",
+    "name": "Blog Post Writer",
+    "version": "1.0.0",
+    "description": "Researches your market and audience, audits your existing blog, then writes SEO/GEO-optimized blog posts with three style variants to choose from",
+    "category": "general",
+    "tags": ["blog", "content", "seo", "geo", "writing", "marketing"],
+    "author": "homer@amiara.ai",
+    "status": "draft",
+    "config": {
+      "timeout": 600000,
+      "max_retries": 2,
+      "cache_ttl": 3600,
+      "output_format": "markdown"
+    },
+    "access": {
+      "roles": ["admin", "mentor", "user"],
+      "organizations": ["*"],
+      "require_approval": false
+    }
+  },
+
+  "skills": [
+    "copywriting",
+    "seo-geo-writing",
+    "content-strategy",
+    "marketing-compliance",
+    "blog-audit"
+  ],
+
+  "tools": [
+    "search_web",
+    "retrieve_reference_content",
+    "add_file_to_kb",
+    "create_document_artifact",
+    "manage_business_fact"
+  ],
+
+  "question_sets": [
+    {
+      "type": "embedded",
+      "id": "website-status",
+      "questions": [
+        {
+          "id": "has-website",
+          "question": "Do you have a live website with a blog?",
+          "responseKey": "blog.website_status",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Yes — I have a website with an active blog",
+            "Yes — I have a website but no blog yet",
+            "No — I don't have a website"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "condition": "responses['blog.website_status'] === 'Yes — I have a website with an active blog'",
+      "questions": [
+        {
+          "id": "existing-blog-url",
+          "question": "What is the URL of your blog?",
+          "responseKey": "blog.existing_url",
+          "format": "url",
+          "required": true,
+          "hint": "We'll analyze your existing content to match style and avoid topic overlap"
+        },
+        {
+          "id": "match-existing-style",
+          "question": "Should the new post match the writing style of your existing blog?",
+          "responseKey": "blog.match_style",
+          "format": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "condition": "responses['blog.website_status'] === 'Yes — I have a website with an active blog' || responses['blog.website_status'] === 'Yes — I have a website but no blog yet'",
+      "questions": [
+        {
+          "id": "blog-topic",
+          "question": "What topic should this blog post cover?",
+          "responseKey": "blog.topic",
+          "format": "textarea",
+          "required": true,
+          "hint": "Be as specific as possible. E.g., 'How small e-commerce brands can compete with Amazon on customer experience'"
+        },
+        {
+          "id": "target-audience",
+          "question": "Who is the target reader for this post?",
+          "responseKey": "blog.audience",
+          "format": "textarea",
+          "required": true,
+          "hint": "E.g., 'Small business owners in DTC e-commerce, revenue $500K-$5M'"
+        },
+        {
+          "id": "blog-goal",
+          "question": "What is the primary goal of this post?",
+          "responseKey": "blog.goal",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Drive organic search traffic",
+            "Establish thought leadership",
+            "Generate leads / email signups",
+            "Educate existing customers",
+            "Support a product launch"
+          ]
+        },
+        {
+          "id": "tone-preference",
+          "question": "What tone should the post use?",
+          "responseKey": "blog.tone",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Professional and authoritative",
+            "Conversational and approachable",
+            "Data-driven and analytical",
+            "Bold and opinionated",
+            "Educational and instructive"
+          ]
+        },
+        {
+          "id": "word-count",
+          "question": "Approximate word count?",
+          "responseKey": "blog.length",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Short (600-800 words)",
+            "Medium (1000-1500 words)",
+            "Long-form (2000-3000 words)"
+          ]
+        },
+        {
+          "id": "keywords",
+          "question": "Any specific keywords you want to target? (optional)",
+          "responseKey": "blog.keywords",
+          "format": "textarea",
+          "required": false,
+          "hint": "Comma-separated. If left blank, we'll research the best keywords for your topic."
+        }
+      ]
+    }
+  ],
+
+  "references": {
+    "kb_items": [],
+    "searches": [
+      {
+        "id": "org-brand-voice",
+        "strategy": "semantic",
+        "query_template": "brand voice guidelines writing style",
+        "filters": {
+          "content_type": ["document"],
+          "min_similarity": 0.7
+        },
+        "limit": 3
+      },
+      {
+        "id": "prior-blog-audit",
+        "strategy": "semantic",
+        "query_template": "blog audit content analysis",
+        "filters": {
+          "content_type": ["document"],
+          "min_similarity": 0.7
+        },
+        "limit": 2
+      },
+      {
+        "id": "prior-market-research",
+        "strategy": "semantic",
+        "query_template": "market research industry keywords {{responses.blog.topic}}",
+        "filters": {
+          "content_type": ["document"],
+          "min_similarity": 0.7
+        },
+        "limit": 2
+      }
+    ]
+  },
+
+  "instructions": {
+    "system_prompt": "You are an expert blog content strategist and writer. Your job is to research the market context, analyze SEO and GEO opportunities, and produce three distinct blog post variants that the user can choose from.\n\nYou have access to skills for SEO/GEO best practices, copywriting, content strategy, blog auditing methodology, and marketing compliance. Apply all of them as appropriate.\n\nIMPORTANT — Website status gate:\nCheck the user's response to `blog.website_status` FIRST before doing any work.\n\n- If \"No — I don't have a website\": DO NOT write a blog post. Instead, produce a brief advisory response explaining that a blog needs a home before content can be effective. Recommend the user run the **Website Setup Advisor** agent first to get their web presence established, then return to the Blog Post Writer. Include 2-3 sentences on why publishing to a proper website matters for SEO/GEO (domain authority, indexing, analytics). End with a clear next step: 'Run the Website Setup Advisor agent to get started.'\n\n- If \"Yes — I have a website but no blog yet\": Proceed with writing the blog post normally (the content is still valuable), but prepend a short advisory note to the output recommending the user run the **Website Setup Advisor** agent to add a blog section to their site. Explain briefly what a blog section needs (URL structure like /blog/post-slug, RSS feed, category taxonomy, sitemap inclusion).\n\n- If \"Yes — I have a website with an active blog\": Proceed normally with full research and writing.\n\nIMPORTANT — Research freshness protocol:\nBefore conducting new research, check your KB context for existing research documents (blog audits, market research, keyword analyses). Look for a `research_date` field in any retrieved documents. If existing research is less than 30 days old relative to today's date, use it instead of re-researching. If it is older than 30 days or missing entirely, conduct fresh research and save the results to the knowledge base.\n\nIMPORTANT — Compliance:\nIf the organization operates in a regulated industry (healthcare, financial services, food/supplements, alcohol, cannabis, pharmaceuticals), apply the marketing-compliance skill guidelines to all content. Flag any claims that may need legal review and provide compliant alternatives.",
+
+    "processing_steps": [
+      {
+        "id": "research-and-audit",
+        "description": "Audit existing blog (if URL provided) and research market/keyword landscape. Save findings to KB for future reuse.",
+        "prompt": "## Research & Audit Phase\n\n### User Inputs\n- **Topic:** {{responses.blog.topic}}\n- **Target audience:** {{responses.blog.audience}}\n- **Goal:** {{responses.blog.goal}}\n- **Existing blog URL:** {{responses.blog.existing_url}}\n- **User-provided keywords:** {{responses.blog.keywords}}\n\n### Prior Research from KB\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results, avg relevance: {{this.avg_relevance}}):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\n---\n\n### Your Tasks\n\n#### A. Check Research Freshness\nReview any prior research documents found above. If they contain a `research_date` that is less than 30 days old, summarize the existing findings and skip to the Output section. If they are stale or missing, proceed with fresh research below.\n\n#### B. Blog Audit (only if existing_url was provided)\nUse the `search_web` tool to analyze the user's existing blog. Following the blog-audit skill methodology, identify:\n- Content themes and topic coverage\n- Writing style and tone fingerprint\n- Publishing frequency and gaps\n- Topics already covered (to avoid duplication with the new post)\n\nSave the audit results to the knowledge base using `add_file_to_kb`. Include a YAML header with `research_date` set to today's date.\n\n#### C. Market & Keyword Research\nUse `search_web` to research:\n1. Top-performing blog content in this industry for this topic\n2. Search volume signals — what terms people actually search for around this topic\n3. People Also Ask questions, Reddit threads, and forum discussions about this topic\n4. How competitors cover this topic — what angles they use, what they miss\n\nBuild a **keyword hotlist** of 10-15 target terms:\n- 1 primary keyword (highest relevance + volume)\n- 3-5 long-tail keyword variants\n- 3-5 semantic siblings (related terms the post should naturally include)\n- 2-3 question-format keywords (for H2/H3 headings and GEO optimization)\n\n#### D. Reader Persona\nBased on the audience description and your market research, define the target reader:\n- Knowledge level (beginner / intermediate / expert)\n- Primary pain points related to the topic\n- What would make them click, read, and share this post\n- What format and depth they prefer\n\n#### E. Recommended Angle\nBased on all research, recommend the strongest unique angle for this post — what will make it stand out from existing content on this topic.\n\n---\n\n### Output Format\nReturn a structured research brief with these sections:\n1. **Research Freshness Status** — fresh research or reusing existing (with date)\n2. **Blog Audit Summary** (if applicable)\n3. **Keyword Hotlist** — table with keyword, type (primary/long-tail/semantic/question), and estimated intent\n4. **Competitive Content Landscape** — what exists, what's missing\n5. **Reader Persona** — the profile defined above\n6. **Recommended Angle** — your top suggestion with rationale\n\nAfter generating the brief, save it to the knowledge base using `add_file_to_kb` with the title format: `Blog Research: [topic keyword] — [today's date]`. Include this YAML header in the saved content:\n```\n---\nresearch_date: [today's date in YYYY-MM-DD format]\ntopic: {{responses.blog.topic}}\ntype: blog-market-research\n---\n```",
+        "references": {
+          "searches": [
+            {
+              "id": "topic-specific-research",
+              "strategy": "semantic",
+              "query_template": "blog research keywords {{responses.blog.topic}}",
+              "limit": 3
+            }
+          ]
+        }
+      },
+      {
+        "id": "write-variants",
+        "description": "Write three distinct blog post variants based on research findings, each differentiated by angle.",
+        "prompt": "## Blog Writing Phase\n\n### Research Brief\n{{prior_steps.research-and-audit.content}}\n\n### User Preferences\n- **Topic:** {{responses.blog.topic}}\n- **Tone:** {{responses.blog.tone}}\n- **Length:** {{responses.blog.length}}\n- **Goal:** {{responses.blog.goal}}\n- **Match existing style:** {{responses.blog.match_style}}\n\n---\n\n### Instructions\n\nUsing the research brief above and your SEO/GEO writing, copywriting, and content strategy skills, write **three distinct blog post variants**.\n\nEach variant MUST:\n1. Target the primary keyword from the hotlist naturally (not stuffed)\n2. Include secondary and semantic keywords where they fit naturally\n3. Follow SEO structure: optimized H1, keyword-rich H2s, proper meta description\n4. Be optimized for GEO: definitive statements, structured data, direct answers, FAQ section\n5. Match the requested tone: {{responses.blog.tone}}\n6. Hit the approximate word count: {{responses.blog.length}}\n7. Include a compelling introduction, logical structure, and strong conclusion with CTA aligned to the goal: {{responses.blog.goal}}\n8. If style matching was requested, reflect the style fingerprint from the blog audit\n\nIf the organization is in a regulated industry, apply marketing compliance guidelines. Flag any claims that need legal review and provide compliant alternatives inline.\n\n---\n\n### The Three Variants\n\n**Variant A — Data-Led**\nOpens with statistics, research findings, and data. Establishes authority through numbers. Best for: authoritative positioning, earning backlinks, B2B audiences.\n\n**Variant B — Story-Led**\nOpens with a narrative, case study, or real-world scenario. Hooks through empathy and relatability. Best for: engagement, social sharing, building brand connection.\n\n**Variant C — Practical / How-To**\nOpens with actionable steps and a clear framework. Delivers immediate utility. Best for: search traffic, bookmarking, evergreen value, lead generation.\n\n---\n\n### For Each Variant Provide\n\n1. **Suggested title** (with primary keyword, 50-60 characters)\n2. **Meta description** (155 characters max, with keyword and hook)\n3. **URL slug** (short, hyphenated, keyword-rich)\n4. **The full blog post** (complete, publication-ready markdown)\n5. **Pros and cons** of this angle for the user's specific goal\n6. **Search potential assessment** — how well this variant targets the keyword hotlist\n\n---\n\n### After All Three Variants\n\nProvide a **Recommendation** section:\n- Which variant best serves the user's stated goal ({{responses.blog.goal}}) and why\n- What elements could be combined from multiple variants for an even stronger post\n- Suggested next steps (e.g., internal linking opportunities, follow-up posts, content repurposing ideas)",
+        "depends_on": ["research-and-audit"]
+      }
+    ]
+  },
+
+  "templates": {
+    "main": {
+      "format": "markdown",
+      "template": "# Blog Post Options: {{responses.blog.topic}}\n\n**Target audience:** {{responses.blog.audience}}\n**Goal:** {{responses.blog.goal}}\n**Tone:** {{responses.blog.tone}}\n**Length:** {{responses.blog.length}}\n\n---\n\n{{content}}\n\n---\n\n*Generated by Blog Post Writer v{{agent.version}}*"
+    }
+  },
+
+  "execution": {
+    "pre_hooks": [],
+    "post_hooks": [
+      {
+        "id": "save-output-artifact",
+        "description": "Save the blog post variants as a document artifact for future reference",
+        "action": "create_artifact",
+        "config": {
+          "title_template": "Blog Post Variants: {{responses.blog.topic}}",
+          "artifact_type": "document"
+        }
+      }
+    ]
+  },
+
+  "validation": {
+    "input_rules": [
+      {
+        "field": "responses.blog.topic",
+        "rules": {
+          "required": true,
+          "type": "string",
+          "min_length": 10
+        }
+      },
+      {
+        "field": "responses.blog.audience",
+        "rules": {
+          "required": true,
+          "type": "string",
+          "min_length": 10
+        }
+      },
+      {
+        "field": "responses.blog.goal",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.blog.tone",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.blog.length",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    ],
+    "output_rules": [
+      {
+        "field": "content",
+        "rules": {
+          "required": true,
+          "min_length": 500
+        }
+      }
+    ]
+  },
+
+  "version_history": [
+    {
+      "version": "1.0.0",
+      "date": "2026-04-02",
+      "changes": "Initial version — research + 3-variant blog writing with SEO/GEO optimization",
+      "author": "homer@amiara.ai"
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-04-02",
+      "changes": "Added website status gating question — early exit for users without a website (refers to Website Setup Advisor), advisory note for users without a blog section",
+      "author": "homer@amiara.ai"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "name": "conversion-cta-specialist",
+  "description": "The Conversion CTA Specialist — analyzes a user's website for CTA copy, placement, and design, then generates optimized CTA strategies to increase conversions — with user confirmation and strategy selection pauses",
+  "status": "active",
+  "coordination_pattern": "sequential",
+  "config": {
+    "output_config": {
+      "create_artifact": true,
+      "artifact_title": "CTA Optimization: Implementation Plan"
+    }
+  },
+  "trigger_config": {
+    "triggers": [
+      { "type": "event", "event": "coo_action_assigned" },
+      { "type": "manual" }
+    ]
+  },
+  "steps": [
+    {
+      "id": "analyze_website",
+      "name": "Analyze Website CTAs",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{cta-website-analyzer-id}}",
+        "timeout": 300000
+      }
+    },
+    {
+      "id": "confirm_cta_inventory",
+      "name": "Confirm CTA Inventory",
+      "type": "pause",
+      "config": {
+        "title": "Let's confirm what we found on your site",
+        "description": "We've crawled your website and cataloged your CTAs. Please review and fill in anything we missed.",
+        "ui_schema": {
+          "sections": [
+            {
+              "title": "Business & Site Understanding",
+              "description": "Here's what we know about your business and website:",
+              "fields": [
+                {
+                  "id": "business_context_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_website.output.business_context"
+                },
+                {
+                  "id": "business_accurate",
+                  "type": "boolean",
+                  "label": "Is this understanding of your business accurate?",
+                  "required": true
+                },
+                {
+                  "id": "business_corrections",
+                  "type": "textarea",
+                  "label": "What would you change or add about your business?",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "title": "CTA Inventory",
+              "description": "Here are the CTAs we found across your site. This is critical — please correct anything that's wrong and add any we missed.",
+              "fields": [
+                {
+                  "id": "cta_inventory_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_website.output.cta_inventory"
+                },
+                {
+                  "id": "cta_inventory_accurate",
+                  "type": "boolean",
+                  "label": "Does this match what's on your site?",
+                  "required": true
+                },
+                {
+                  "id": "cta_corrections",
+                  "type": "textarea",
+                  "label": "What CTAs did we miss, or what did we get wrong?",
+                  "placeholder": "E.g., 'There's also a sticky banner at the top offering 10% off', 'The Buy Now button only shows on desktop', 'We recently changed the homepage CTA to Get Started'...",
+                  "required": false
+                },
+                {
+                  "id": "conversion_goal",
+                  "type": "textarea",
+                  "label": "What is the #1 action you want visitors to take on your site?",
+                  "placeholder": "E.g., 'Buy a product', 'Book a consultation', 'Sign up for a free trial', 'Call us'...",
+                  "required": true
+                },
+                {
+                  "id": "known_issues",
+                  "type": "textarea",
+                  "label": "Do you already know of any CTA problems? (optional)",
+                  "placeholder": "E.g., 'People say they can't find the buy button on mobile', 'Our bounce rate is high on the pricing page'...",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "input_mapping": {
+        "business_context": "steps.analyze_website.output.business_context",
+        "cta_inventory": "steps.analyze_website.output.cta_inventory"
+      }
+    },
+    {
+      "id": "industry_research",
+      "name": "Research Industry CTA Best Practices",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{cta-industry-researcher-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "business_context": "steps.analyze_website.output.business_context",
+        "cta_inventory": "steps.analyze_website.output.cta_inventory",
+        "user_corrections": "steps.confirm_cta_inventory.output.cta_corrections",
+        "business_corrections": "steps.confirm_cta_inventory.output.business_corrections",
+        "conversion_goal": "steps.confirm_cta_inventory.output.conversion_goal",
+        "known_issues": "steps.confirm_cta_inventory.output.known_issues",
+        "website_url": "steps.analyze_website.output.website_url"
+      }
+    },
+    {
+      "id": "generate_strategies",
+      "name": "Generate 3 CTA Optimization Strategies",
+      "type": "prompt",
+      "config": {
+        "prompt": "You are a conversion rate optimization specialist focused on CTAs. Based on the CTA audit, business context, and industry research below, generate exactly 3 CTA optimization strategies.\n\n## Business Context\n{{BUSINESS_CONTEXT}}\n\n## Current CTA Inventory\n{{CTA_INVENTORY}}\n\n## User's Primary Conversion Goal\n{{CONVERSION_GOAL}}\n\n## Known Issues\n{{KNOWN_ISSUES}}\n\n## User Corrections\n{{USER_CORRECTIONS}}\n\n## Industry Research & Best Practices\n{{INDUSTRY_RESEARCH}}\n\n---\n\n## Instructions\n\nGenerate 3 strategies that each take a different approach to improving CTA conversion. Strategies should be MECE — vary across these dimensions:\n\n| Dimension | Options |\n|---|---|\n| **Focus** | Copy rewrite / Placement restructure / Design overhaul |\n| **Scope** | Single high-impact page / Full-site systematic / Funnel-stage targeted |\n| **Effort** | Quick wins (< 1 day) / Moderate (1-3 days) / Comprehensive (1-2 weeks) |\n\nFor each strategy provide:\n\n### Strategy [A/B/C]: [Name]\n**Focus:** [Copy / Placement / Design — or combination]\n**Scope:** [Which pages/areas of the site]\n**Effort Level:** [Quick wins / Moderate / Comprehensive]\n\n**What changes:** 2-3 sentence description of the core change\n\n**Specific changes:**\n- Page: [page name] — Current: \"[current CTA]\" → Proposed: \"[new CTA]\" + [placement/design change]\n- (list each concrete change)\n\n**Why this works:** Cite specific evidence from the industry research or general CTA best practices\n\n**Expected conversion lift:** X-Y% based on benchmarks for this type of change\n\n**Pros:**\n- ...\n\n**Cons:**\n- ...\n\n**Implementation effort:** What a non-technical person would need to do (or ask their developer/designer to do)\n\n---\n\nAfter all 3 strategies, provide:\n\n### Our Recommendation\nWhich strategy we recommend starting with and why. Factor in:\n- Expected conversion impact\n- Implementation effort (remember: assume non-technical user)\n- Risk to existing conversion rate\n- How quickly they'll see results\n- Their stated conversion goal and known issues",
+        "model": "claude-sonnet-4-6",
+        "temperature": 0.4,
+        "response_format": "markdown"
+      },
+      "input_mapping": {
+        "BUSINESS_CONTEXT": "steps.analyze_website.output.business_context",
+        "CTA_INVENTORY": "steps.analyze_website.output.cta_inventory",
+        "CONVERSION_GOAL": "steps.confirm_cta_inventory.output.conversion_goal",
+        "KNOWN_ISSUES": "steps.confirm_cta_inventory.output.known_issues",
+        "USER_CORRECTIONS": "steps.confirm_cta_inventory.output.cta_corrections",
+        "INDUSTRY_RESEARCH": "steps.industry_research.output"
+      },
+      "quality_gate": {
+        "checks": [
+          { "field": "content", "condition": "not_empty" }
+        ],
+        "on_failure": "retry",
+        "max_retries": 2
+      }
+    },
+    {
+      "id": "select_strategy",
+      "name": "Choose Your CTA Strategy",
+      "type": "pause",
+      "config": {
+        "title": "Pick your CTA optimization path",
+        "description": "We've developed 3 approaches to improve your conversion CTAs. Review each and pick the one you want to implement.",
+        "ui_schema": {
+          "sections": [
+            {
+              "title": "Your Options",
+              "fields": [
+                {
+                  "id": "strategies_display",
+                  "type": "readonly",
+                  "source": "steps.generate_strategies.output"
+                },
+                {
+                  "id": "chosen_strategy",
+                  "type": "select",
+                  "label": "Which strategy do you want to pursue?",
+                  "required": true,
+                  "options": [
+                    "Strategy A",
+                    "Strategy B",
+                    "Strategy C"
+                  ]
+                },
+                {
+                  "id": "additional_input",
+                  "type": "textarea",
+                  "label": "Any constraints, preferences, or additional context?",
+                  "placeholder": "E.g., 'We can't change the header — it's controlled by our theme', 'I want to focus on mobile first', 'We use Shopify and can only edit through the theme editor'...",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "input_mapping": {
+        "strategies": "steps.generate_strategies.output"
+      }
+    },
+    {
+      "id": "build_implementation_plan",
+      "name": "Build Implementation Plan",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{cta-implementation-planner-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "business_context": "steps.analyze_website.output.business_context",
+        "cta_inventory": "steps.analyze_website.output.cta_inventory",
+        "website_url": "steps.analyze_website.output.website_url",
+        "conversion_goal": "steps.confirm_cta_inventory.output.conversion_goal",
+        "industry_research": "steps.industry_research.output",
+        "all_strategies": "steps.generate_strategies.output",
+        "chosen_strategy": "steps.select_strategy.output.chosen_strategy",
+        "user_constraints": "steps.select_strategy.output.additional_input"
+      }
+    }
+  ]
+}

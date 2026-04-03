@@ -1,0 +1,221 @@
+{
+  "name": "aov-accelerator",
+  "description": "The AOV Accelerator — analyzes a user's checkout flow and competitive landscape, then generates MECE upsell strategies to increase Average Order Value — with user confirmation and strategy selection pauses",
+  "status": "active",
+  "coordination_pattern": "sequential",
+  "config": {
+    "output_config": {
+      "create_artifact": true,
+      "artifact_title": "AOV Accelerator: Upsell Strategy Implementation Plan"
+    }
+  },
+  "trigger_config": {
+    "triggers": [
+      { "type": "event", "event": "coo_action_assigned" },
+      { "type": "manual" }
+    ]
+  },
+  "steps": [
+    {
+      "id": "gather_context",
+      "name": "Gather Business & Checkout Context",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{upsell-context-gatherer-id}}",
+        "timeout": 300000
+      }
+    },
+    {
+      "id": "confirm_business",
+      "name": "Confirm Business Understanding",
+      "type": "pause",
+      "config": {
+        "title": "Let's make sure we understand your business",
+        "description": "We've analyzed your business data and checkout flow. Please review and correct anything that's off.",
+        "ui_schema": {
+          "sections": [
+            {
+              "title": "Business Understanding",
+              "description": "Here's what we found about your products, pricing, and customers:",
+              "fields": [
+                {
+                  "id": "context_display",
+                  "type": "readonly",
+                  "source": "steps.gather_context.output.business_summary"
+                },
+                {
+                  "id": "business_accurate",
+                  "type": "boolean",
+                  "label": "Is this understanding of your business accurate?",
+                  "required": true
+                },
+                {
+                  "id": "corrections",
+                  "type": "textarea",
+                  "label": "What would you change, correct, or add?",
+                  "placeholder": "Add any details about your products, pricing, typical customer, or purchase patterns that we missed...",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "title": "Checkout Flow",
+              "description": "Help us understand how your customers buy from you.",
+              "fields": [
+                {
+                  "id": "checkout_analysis_display",
+                  "type": "readonly",
+                  "source": "steps.gather_context.output.checkout_analysis"
+                },
+                {
+                  "id": "checkout_method",
+                  "type": "select",
+                  "label": "How do your customers check out?",
+                  "required": true,
+                  "options": [
+                    "Shopify checkout",
+                    "WooCommerce checkout",
+                    "Stripe Checkout (hosted)",
+                    "Custom checkout page",
+                    "Over the phone",
+                    "In person / POS",
+                    "Other"
+                  ]
+                },
+                {
+                  "id": "checkout_url",
+                  "type": "url",
+                  "label": "Checkout page URL (if available)",
+                  "required": false,
+                  "placeholder": "https://yourstore.com/checkout"
+                },
+                {
+                  "id": "checkout_details",
+                  "type": "textarea",
+                  "label": "Describe your checkout flow in your own words, or add anything our analysis missed",
+                  "placeholder": "E.g., 'Customer adds to cart, sees a cart drawer, then goes to a 1-page Shopify checkout. No upsells currently. We accept credit cards and Apple Pay.'",
+                  "required": false
+                },
+                {
+                  "id": "checkout_screenshots",
+                  "type": "file_upload",
+                  "label": "Upload screenshots of your checkout flow (optional)",
+                  "accept": "image/*",
+                  "multiple": true,
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "input_mapping": {
+        "business_summary": "steps.gather_context.output.business_summary",
+        "checkout_analysis": "steps.gather_context.output.checkout_analysis"
+      }
+    },
+    {
+      "id": "competitive_research",
+      "name": "Research Competitive Upsell Strategies",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{upsell-competitive-researcher-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "business_context": "steps.gather_context.output",
+        "user_corrections": "steps.confirm_business.output.corrections",
+        "checkout_method": "steps.confirm_business.output.checkout_method",
+        "checkout_url": "steps.confirm_business.output.checkout_url",
+        "checkout_details": "steps.confirm_business.output.checkout_details"
+      }
+    },
+    {
+      "id": "generate_strategies",
+      "name": "Generate 3 MECE Upsell Strategies",
+      "type": "prompt",
+      "config": {
+        "prompt": "You are an AOV optimization strategist. Based on the business context, checkout analysis, and competitive research below, generate exactly 3 upsell strategies that are MECE (Mutually Exclusive, Collectively Exhaustive).\n\n## Business Context\n{{BUSINESS_CONTEXT}}\n\n## User Corrections & Additional Info\n{{USER_CORRECTIONS}}\n\n## Checkout Method: {{CHECKOUT_METHOD}}\n## Checkout Details: {{CHECKOUT_DETAILS}}\n\n## Competitive Research\n{{COMPETITIVE_RESEARCH}}\n\n---\n\n## Instructions\n\nGenerate 3 strategies that vary across placement, mechanism, and psychology (per the upsell-strategies skill MECE framework).\n\nFor each strategy provide:\n\n### Strategy [A/B/C]: [Name]\n**Placement:** [Pre-cart / In-cart / Post-purchase]\n**Mechanism:** [Bundle / Upgrade / Add-on / Threshold]\n**Primary Psychology:** [Value / Urgency / Social proof]\n\n**What it is:** 2-3 sentence description\n\n**How it works:** Step-by-step implementation approach tailored to their specific checkout method ({{CHECKOUT_METHOD}})\n\n**Expected AOV lift:** X-Y% based on industry benchmarks and their specific situation\n\n**Pros:**\n- ...\n\n**Cons:**\n- ...\n\n**Real-world example:** A specific company or case study from the competitive research that uses this approach\n\n**Implementation effort:** Low / Medium / High — with specifics (e.g., 'Install ReConvert app on Shopify, configure in 2 hours' or 'Requires custom development, ~1-2 weeks')\n\n---\n\nAfter all 3 strategies, provide:\n\n### Our Recommendation\nWhich strategy we recommend and why, considering their specific business, checkout platform, and goals. Factor in:\n- Expected AOV impact\n- Implementation effort\n- Risk to existing conversion rate\n- How quickly they'll see results",
+        "model": "claude-sonnet-4-6",
+        "temperature": 0.4,
+        "response_format": "markdown"
+      },
+      "input_mapping": {
+        "BUSINESS_CONTEXT": "steps.gather_context.output.business_summary",
+        "USER_CORRECTIONS": "steps.confirm_business.output.corrections",
+        "CHECKOUT_METHOD": "steps.confirm_business.output.checkout_method",
+        "CHECKOUT_DETAILS": "steps.confirm_business.output.checkout_details",
+        "COMPETITIVE_RESEARCH": "steps.competitive_research.output"
+      },
+      "quality_gate": {
+        "checks": [
+          { "field": "content", "condition": "not_empty" }
+        ],
+        "on_failure": "retry",
+        "max_retries": 2
+      }
+    },
+    {
+      "id": "select_strategy",
+      "name": "Select Your Upsell Strategy",
+      "type": "pause",
+      "config": {
+        "title": "Choose your upsell strategy",
+        "description": "We've developed 3 different approaches to increase your AOV. Review each one and pick the path you want to pursue.",
+        "ui_schema": {
+          "sections": [
+            {
+              "title": "Your Options",
+              "fields": [
+                {
+                  "id": "strategies_display",
+                  "type": "readonly",
+                  "source": "steps.generate_strategies.output"
+                },
+                {
+                  "id": "chosen_strategy",
+                  "type": "select",
+                  "label": "Which strategy do you want to pursue?",
+                  "required": true,
+                  "options": [
+                    "Strategy A",
+                    "Strategy B",
+                    "Strategy C"
+                  ]
+                },
+                {
+                  "id": "additional_input",
+                  "type": "textarea",
+                  "label": "Any constraints, preferences, or additional context for implementation?",
+                  "placeholder": "E.g., 'We can't offer discounts over 15%', 'We want to launch this within 2 weeks', 'We already use Bold Upsell app'...",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "input_mapping": {
+        "strategies": "steps.generate_strategies.output"
+      }
+    },
+    {
+      "id": "deepen_strategy",
+      "name": "Build Detailed Implementation Plan",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{upsell-strategy-deepener-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "business_context": "steps.gather_context.output",
+        "checkout_method": "steps.confirm_business.output.checkout_method",
+        "checkout_details": "steps.confirm_business.output.checkout_details",
+        "competitive_research": "steps.competitive_research.output",
+        "all_strategies": "steps.generate_strategies.output",
+        "chosen_strategy": "steps.select_strategy.output.chosen_strategy",
+        "user_constraints": "steps.select_strategy.output.additional_input"
+      }
+    }
+  ]
+}

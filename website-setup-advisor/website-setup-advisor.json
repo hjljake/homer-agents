@@ -1,0 +1,275 @@
+{
+  "metadata": {
+    "id": "website-setup-advisor",
+    "name": "Website Setup Advisor",
+    "version": "1.0.0",
+    "description": "Recommends the right website platform and provides step-by-step setup guidance for non-technical founders — from domain registration through blog-ready configuration",
+    "category": "planning",
+    "tags": ["website", "setup", "platform", "blog", "cms", "non-technical"],
+    "author": "homer@amiara.ai",
+    "status": "draft",
+    "config": {
+      "timeout": 300000,
+      "max_retries": 2,
+      "cache_ttl": 3600,
+      "output_format": "markdown"
+    },
+    "access": {
+      "roles": ["admin", "mentor", "user"],
+      "organizations": ["*"],
+      "require_approval": false
+    }
+  },
+
+  "skills": [
+    "website-platforms",
+    "seo-geo-writing"
+  ],
+
+  "tools": [
+    "search_web",
+    "retrieve_reference_content",
+    "add_file_to_kb",
+    "create_document_artifact",
+    "manage_business_fact"
+  ],
+
+  "question_sets": [
+    {
+      "type": "embedded",
+      "id": "website-situation",
+      "questions": [
+        {
+          "id": "current-status",
+          "question": "What's your current website situation?",
+          "responseKey": "website.status",
+          "format": "select",
+          "required": true,
+          "options": [
+            "I have no website at all",
+            "I have a website but need to add a blog"
+          ]
+        },
+        {
+          "id": "business-description",
+          "question": "In 2-3 sentences, what does your business do and who are your customers?",
+          "responseKey": "website.business",
+          "format": "textarea",
+          "required": true,
+          "hint": "E.g., 'We're a boutique accounting firm serving small businesses in Texas. Our clients are typically 5-50 employee companies.'"
+        },
+        {
+          "id": "sells-products-online",
+          "question": "Do you sell products online (or plan to)?",
+          "responseKey": "website.ecommerce",
+          "format": "select",
+          "required": true,
+          "options": [
+            "No — service-based or no online sales",
+            "Yes — I sell physical products",
+            "Yes — I sell digital products or subscriptions",
+            "I plan to in the future"
+          ]
+        },
+        {
+          "id": "budget",
+          "question": "What's your monthly budget for website hosting and tools?",
+          "responseKey": "website.budget",
+          "format": "select",
+          "required": true,
+          "options": [
+            "As little as possible (under $20/mo)",
+            "Moderate ($20-50/mo)",
+            "Flexible ($50-200/mo)",
+            "Not a constraint ($200+/mo)"
+          ]
+        },
+        {
+          "id": "has-domain",
+          "question": "Do you already have a domain name (e.g., mybusiness.com)?",
+          "responseKey": "website.has_domain",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Yes — I own a domain",
+            "No — I need to get one"
+          ]
+        },
+        {
+          "id": "technical-comfort",
+          "question": "How comfortable are you with technology?",
+          "responseKey": "website.tech_level",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Not at all — I need everything explained step by step",
+            "Somewhat — I can follow instructions and figure things out",
+            "Comfortable — I've built basic websites or used CMS tools before"
+          ]
+        },
+        {
+          "id": "timeline",
+          "question": "How soon do you need the website or blog live?",
+          "responseKey": "website.timeline",
+          "format": "select",
+          "required": true,
+          "options": [
+            "This week",
+            "Within a month",
+            "No rush — I want to do it right"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "condition": "responses['website.status'] === 'I have a website but need to add a blog'",
+      "questions": [
+        {
+          "id": "existing-site-url",
+          "question": "What is your current website URL?",
+          "responseKey": "website.existing_url",
+          "format": "url",
+          "required": true
+        },
+        {
+          "id": "existing-platform",
+          "question": "Do you know what platform your website is built on?",
+          "responseKey": "website.existing_platform",
+          "format": "select",
+          "required": true,
+          "options": [
+            "WordPress",
+            "Squarespace",
+            "Wix",
+            "Webflow",
+            "Shopify",
+            "Custom-built / I don't know",
+            "Other"
+          ]
+        }
+      ]
+    }
+  ],
+
+  "references": {
+    "kb_items": [],
+    "searches": [
+      {
+        "id": "strategist-report",
+        "strategy": "semantic",
+        "query_template": "business strategy report analysis",
+        "filters": {
+          "content_type": ["document"],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      },
+      {
+        "id": "business-facts",
+        "strategy": "semantic",
+        "query_template": "business profile industry target audience",
+        "filters": {
+          "content_type": ["document"],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      }
+    ]
+  },
+
+  "instructions": {
+    "system_prompt": "You are a website setup advisor for non-technical founders and small business employees. Your job is to recommend the right website platform and provide a clear, jargon-free, step-by-step setup guide.\n\nYour audience is NOT technical. Write like you're explaining to a smart friend who has never built a website. Every instruction should be specific — 'click the blue button that says Create Site' not 'initialize your instance.'\n\nYou have access to the website-platforms skill which contains detailed platform comparisons and an Amiara integration tier list. Use it to make informed recommendations.\n\nYou also have access to the seo-geo-writing skill — use it when advising on blog architecture (URL structure, meta tags, sitemap setup).\n\nIMPORTANT — Context enrichment:\nBefore making recommendations, check the KB search results for any existing Strategist report or business profile. If found, use that data to inform your platform recommendation — the user's industry, target customers, business model, and growth goals all affect which platform is best.\n\nIMPORTANT — Amiara integration:\nAlways factor in Amiara integration readiness when recommending platforms. If two platforms are otherwise equal, prefer the one that Amiara can integrate with more easily (Tier 1 > Tier 2 > Tier 3). Explain this to the user in plain language: 'This platform works well with Amiara, which means we can help you draft and manage blog posts automatically in the future.'\n\nIMPORTANT — Two paths:\n- If the user has NO website: recommend a platform, walk them through full setup (domain, hosting, essential pages, blog configuration)\n- If the user HAS a website but needs a blog: identify their current platform, recommend the best way to add a blog to it (native blog feature, subdomain WordPress, or migration if the platform is limiting)",
+
+    "processing_steps": [
+      {
+        "id": "assess-and-recommend",
+        "description": "Analyze user situation, pull Strategist report from KB, and determine the best platform recommendation with rationale.",
+        "prompt": "## Assessment Phase\n\n### User Situation\n- **Status:** {{responses.website.status}}\n- **Business:** {{responses.website.business}}\n- **E-commerce needs:** {{responses.website.ecommerce}}\n- **Budget:** {{responses.website.budget}}\n- **Has domain:** {{responses.website.has_domain}}\n- **Technical comfort:** {{responses.website.tech_level}}\n- **Timeline:** {{responses.website.timeline}}\n- **Existing URL:** {{responses.website.existing_url}}\n- **Existing platform:** {{responses.website.existing_platform}}\n\n### Business Context from KB\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\n---\n\n### Your Tasks\n\n#### A. Situation Analysis\nSummarize the user's situation in 3-4 bullet points. Factor in:\n- Their business type and customer profile\n- Any context from the Strategist report in KB\n- Their constraints (budget, technical skill, timeline)\n- Whether they need e-commerce\n\n#### B. Platform Recommendation\nUsing the website-platforms skill, recommend ONE primary platform and ONE runner-up. For each:\n- Why it fits their specific situation\n- Monthly cost estimate for their use case\n- Amiara integration readiness (explain in plain language what this means for them)\n- Any tradeoffs they should know about\n\nIf the user already has a site and you're recommending how to add a blog:\n- If their current platform supports blogging well (WordPress, Webflow, Squarespace): recommend using the native blog feature\n- If their platform's blog is limited (Shopify, Wix): recommend either using it for simplicity or setting up WordPress on a /blog subdirectory or blog.domain.com subdomain for a more robust solution\n- If their site is custom-built: recommend adding WordPress on a subdomain\n\n#### C. If they need a domain\nRecommend a domain registrar (Namecheap, Cloudflare Registrar, or Google Domains) and walk them through choosing a good domain name: keep it short, brandable, .com preferred, avoid hyphens.\n\n---\n\n### Output Format\n1. **Your Situation** — 3-4 bullet summary\n2. **Our Recommendation: [Platform Name]** — why, cost, Amiara integration note\n3. **Runner-Up: [Platform Name]** — brief alternative with one-line reasoning\n4. **Domain Guidance** (if needed)\n\nSave the recommendation to KB using `manage_business_fact` with key `website_platform_recommendation` so other agents (like the Blog Post Writer) can reference it.",
+        "references": {
+          "searches": [
+            {
+              "id": "existing-site-analysis",
+              "strategy": "semantic",
+              "query_template": "website analysis {{responses.website.existing_url}}",
+              "limit": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "generate-setup-guide",
+        "description": "Generate a step-by-step setup guide tailored to the recommended platform and user's technical level.",
+        "prompt": "## Setup Guide Phase\n\n### Platform Recommendation from Step 1\n{{prior_steps.assess-and-recommend.content}}\n\n### User Context\n- **Technical comfort:** {{responses.website.tech_level}}\n- **Timeline:** {{responses.website.timeline}}\n- **Status:** {{responses.website.status}}\n- **E-commerce:** {{responses.website.ecommerce}}\n\n---\n\n### Instructions\n\nBased on the platform recommendation from Step 1, generate a complete, step-by-step setup guide. This guide must be:\n- Written for someone at the user's stated technical comfort level\n- Specific enough that the user can follow it without outside help\n- Organized in a logical sequence they can work through in one sitting (or over a weekend)\n\n---\n\n### Guide Structure\n\n#### Part 1: Getting Started (Day 1)\n- Account creation on the recommended platform (exact URL to visit, what to click)\n- Choosing a plan (which specific plan based on their budget and needs)\n- Domain setup (connecting existing domain OR registering a new one)\n- Initial theme/template selection (recommend 2-3 specific templates that fit their business type)\n\n#### Part 2: Essential Pages\nFor each page, explain what it is, why they need it, and what content to include:\n- **Home** — hero section, value proposition, key CTAs\n- **About** — story, team, credibility signals\n- **Services/Products** — what they offer (if e-commerce, product catalog setup)\n- **Contact** — form, email, phone, location if applicable\n- **Blog** — the blog section setup (see Part 3)\n- **Privacy Policy / Terms** — where to generate these (recommend free generators)\n\n#### Part 3: Blog Setup\nUsing your seo-geo-writing skill knowledge, walk them through:\n- Enabling/configuring the blog feature on their platform\n- URL structure — recommend /blog/post-slug format, explain why it matters for SEO\n- Category setup — suggest 3-5 starter categories based on their business\n- Author profile — set up an author page with bio and photo\n- RSS feed — verify it's enabled (most platforms do this automatically)\n- Sitemap — verify the blog is included in the sitemap\n- SEO plugin/settings — platform-specific (e.g., install Yoast on WordPress, enable SEO settings on Squarespace)\n\n#### Part 4: Pre-Launch Checklist\n- [ ] Mobile responsive — test on phone\n- [ ] Page speed — run through PageSpeed Insights, note anything critical\n- [ ] SSL/HTTPS — verify it's enabled (most platforms handle this)\n- [ ] Google Search Console — submit sitemap\n- [ ] Google Analytics or equivalent — install tracking\n- [ ] Social meta tags — verify Open Graph tags work (share a page on social media to test)\n- [ ] Contact form — test it by submitting a test message\n- [ ] 404 page — make sure it exists and looks acceptable\n\n#### Part 5: What to Do Next\n- Come back to the **Blog Post Writer** agent to start creating content\n- Set up Google Business Profile if local business\n- Consider email list setup (recommend Mailchimp free tier or platform-native if available)\n- Schedule a monthly content cadence\n\n---\n\n### Tone\nFriendly, encouraging, specific. Use callout boxes for warnings or tips. Number every step. When referencing a button or menu item, put it in **bold**. When referencing a URL to visit, include the full URL.",
+        "depends_on": ["assess-and-recommend"]
+      }
+    ]
+  },
+
+  "templates": {
+    "main": {
+      "format": "markdown",
+      "template": "# Website Setup Guide\n\n**Prepared for:** {{responses.website.business}}\n\n---\n\n{{content}}\n\n---\n\n*Generated by Website Setup Advisor v{{agent.version}}*\n\n*When you're ready to start creating blog content, come back and run the **Blog Post Writer** agent.*"
+    }
+  },
+
+  "execution": {
+    "pre_hooks": [],
+    "post_hooks": [
+      {
+        "id": "save-setup-guide",
+        "description": "Save the setup guide as a document artifact for future reference",
+        "action": "create_artifact",
+        "config": {
+          "title_template": "Website Setup Guide",
+          "artifact_type": "document"
+        }
+      }
+    ]
+  },
+
+  "validation": {
+    "input_rules": [
+      {
+        "field": "responses.website.status",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.website.business",
+        "rules": {
+          "required": true,
+          "type": "string",
+          "min_length": 20
+        }
+      },
+      {
+        "field": "responses.website.budget",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    ],
+    "output_rules": [
+      {
+        "field": "content",
+        "rules": {
+          "required": true,
+          "min_length": 500
+        }
+      }
+    ]
+  },
+
+  "version_history": [
+    {
+      "version": "1.0.0",
+      "date": "2026-04-02",
+      "changes": "Initial version — platform recommendation + step-by-step setup guide for non-technical founders",
+      "author": "homer@amiara.ai"
+    }
+  ]
+}
