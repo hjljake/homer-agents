@@ -1,0 +1,216 @@
+{
+  "name": "warm-lead-lp-optimizer",
+  "description": "Warm Lead Landing Page Optimizer — analyzes a landing page targeting warm traffic (email, retargeting, SMS, existing customers), scores it against the Warm Lead Scorecard with emphasis on message match and offer clarity, then generates 2 A/B test variants with detailed build-out instructions saved to KB",
+  "status": "active",
+  "coordination_pattern": "sequential",
+  "config": {
+    "output_config": {
+      "create_artifact": true,
+      "artifact_title": "Warm Lead LP Optimization: A/B Test Plan"
+    }
+  },
+  "trigger_config": {
+    "triggers": [
+      { "type": "event", "event": "coo_action_assigned" },
+      { "type": "manual" }
+    ]
+  },
+  "steps": [
+    {
+      "id": "analyze_landing_page",
+      "name": "Analyze Landing Page (Warm Lead Scorecard)",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{warm-lead-lp-analyzer-id}}",
+        "timeout": 300000
+      }
+    },
+    {
+      "id": "confirm_scorecard",
+      "name": "Confirm Scorecard Results",
+      "type": "pause",
+      "config": {
+        "title": "Review your Warm Lead Landing Page Scorecard",
+        "description": "We've analyzed your landing page through the lens of warm traffic conversion — focusing on message match, offer clarity, personalization, and friction. Review the scores and tell us what we got right, what we missed, and which areas matter most.",
+        "ui_schema": {
+          "sections": [
+            {
+              "title": "Message Match Assessment",
+              "description": "How well your landing page delivers on the promise made in the referring channel (email, ad, notification).",
+              "fields": [
+                {
+                  "id": "message_match_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_landing_page.output.message_match_assessment"
+                }
+              ]
+            },
+            {
+              "title": "Scorecard Results",
+              "description": "Here's how your landing page scored across 7 warm-traffic conversion dimensions. Offer clarity, below-the-fold content, and the hero carry equal weight (20 pts each) because warm visitors are evaluating the specifics of your offer.",
+              "fields": [
+                {
+                  "id": "scorecard_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_landing_page.output.scorecard_results"
+                },
+                {
+                  "id": "overall_score_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_landing_page.output.overall_score"
+                },
+                {
+                  "id": "top_strengths_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_landing_page.output.top_strengths"
+                },
+                {
+                  "id": "top_issues_display",
+                  "type": "readonly",
+                  "source": "steps.analyze_landing_page.output.top_issues"
+                }
+              ]
+            },
+            {
+              "title": "Your Feedback",
+              "description": "Help us refine the analysis before we generate optimization variants.",
+              "fields": [
+                {
+                  "id": "scorecard_accurate",
+                  "type": "boolean",
+                  "label": "Does this assessment feel accurate overall?",
+                  "required": true
+                },
+                {
+                  "id": "score_corrections",
+                  "type": "textarea",
+                  "label": "What did we get wrong or miss?",
+                  "placeholder": "E.g., 'The page actually does show personalized content when you're logged in', 'We have a pre-filled form but it only works for existing customers', 'The email that links here has different copy than what you assumed'...",
+                  "required": false
+                },
+                {
+                  "id": "priority_sections",
+                  "type": "multi_select",
+                  "label": "Which areas are most important to optimize? (pick 2-3)",
+                  "required": true,
+                  "options": [
+                    "Hero Section (message match, offer headline, CTA)",
+                    "Below-the-Fold Sequence (offer details, reinforcement)",
+                    "Social Proof (offer-specific proof, peer proof)",
+                    "Offer Clarity (deliverables, pricing, risk reversal, personalization)",
+                    "Mobile Experience",
+                    "Brand Identity & Design (channel consistency)",
+                    "Technical & Trust (session continuity, tracking, personalization rendering)"
+                  ]
+                },
+                {
+                  "id": "optimization_constraints",
+                  "type": "textarea",
+                  "label": "Any constraints we should know about?",
+                  "placeholder": "E.g., 'Our email platform can't pass user data to the landing page', 'We use Shopify and can't add custom scripts', 'We need to keep the same offer structure for compliance reasons'...",
+                  "required": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "input_mapping": {
+        "message_match_assessment": "steps.analyze_landing_page.output.message_match_assessment",
+        "scorecard_results": "steps.analyze_landing_page.output.scorecard_results",
+        "overall_score": "steps.analyze_landing_page.output.overall_score",
+        "top_strengths": "steps.analyze_landing_page.output.top_strengths",
+        "top_issues": "steps.analyze_landing_page.output.top_issues"
+      }
+    },
+    {
+      "id": "optimize_headers",
+      "name": "Optimize Headers & Subheaders",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{warm-lead-header-optimizer-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "scorecard_results": "steps.analyze_landing_page.output.scorecard_results",
+        "business_context": "steps.analyze_landing_page.output.business_context",
+        "page_url": "steps.analyze_landing_page.output.page_url",
+        "page_goal": "steps.analyze_landing_page.output.page_goal",
+        "traffic_source": "steps.analyze_landing_page.output.traffic_source",
+        "referring_message": "steps.analyze_landing_page.output.referring_message",
+        "visitor_relationship": "steps.analyze_landing_page.output.visitor_relationship",
+        "score_corrections": "steps.confirm_scorecard.output.score_corrections",
+        "priority_sections": "steps.confirm_scorecard.output.priority_sections",
+        "optimization_constraints": "steps.confirm_scorecard.output.optimization_constraints"
+      }
+    },
+    {
+      "id": "optimize_icp_positioning",
+      "name": "Optimize ICP Positioning",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{warm-lead-icp-optimizer-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "scorecard_results": "steps.analyze_landing_page.output.scorecard_results",
+        "business_context": "steps.analyze_landing_page.output.business_context",
+        "page_url": "steps.analyze_landing_page.output.page_url",
+        "page_goal": "steps.analyze_landing_page.output.page_goal",
+        "traffic_source": "steps.analyze_landing_page.output.traffic_source",
+        "referring_message": "steps.analyze_landing_page.output.referring_message",
+        "visitor_relationship": "steps.analyze_landing_page.output.visitor_relationship",
+        "score_corrections": "steps.confirm_scorecard.output.score_corrections",
+        "priority_sections": "steps.confirm_scorecard.output.priority_sections",
+        "optimization_constraints": "steps.confirm_scorecard.output.optimization_constraints"
+      }
+    },
+    {
+      "id": "optimize_layout",
+      "name": "Optimize Page Layout",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{warm-lead-layout-optimizer-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "scorecard_results": "steps.analyze_landing_page.output.scorecard_results",
+        "business_context": "steps.analyze_landing_page.output.business_context",
+        "page_url": "steps.analyze_landing_page.output.page_url",
+        "page_goal": "steps.analyze_landing_page.output.page_goal",
+        "traffic_source": "steps.analyze_landing_page.output.traffic_source",
+        "referring_message": "steps.analyze_landing_page.output.referring_message",
+        "visitor_relationship": "steps.analyze_landing_page.output.visitor_relationship",
+        "score_corrections": "steps.confirm_scorecard.output.score_corrections",
+        "priority_sections": "steps.confirm_scorecard.output.priority_sections",
+        "optimization_constraints": "steps.confirm_scorecard.output.optimization_constraints"
+      }
+    },
+    {
+      "id": "generate_ab_variants",
+      "name": "Generate A/B Test Variants",
+      "type": "agent",
+      "config": {
+        "agent_definition_id": "{{warm-lead-ab-variant-builder-id}}",
+        "timeout": 300000
+      },
+      "input_mapping": {
+        "scorecard_results": "steps.analyze_landing_page.output.scorecard_results",
+        "overall_score": "steps.analyze_landing_page.output.overall_score",
+        "message_match_assessment": "steps.analyze_landing_page.output.message_match_assessment",
+        "score_corrections": "steps.confirm_scorecard.output.score_corrections",
+        "priority_sections": "steps.confirm_scorecard.output.priority_sections",
+        "optimization_constraints": "steps.confirm_scorecard.output.optimization_constraints",
+        "business_context": "steps.analyze_landing_page.output.business_context",
+        "page_url": "steps.analyze_landing_page.output.page_url",
+        "traffic_source": "steps.analyze_landing_page.output.traffic_source",
+        "referring_message": "steps.analyze_landing_page.output.referring_message",
+        "visitor_relationship": "steps.analyze_landing_page.output.visitor_relationship",
+        "page_goal": "steps.analyze_landing_page.output.page_goal",
+        "header_recommendations": "steps.optimize_headers.output",
+        "icp_recommendations": "steps.optimize_icp_positioning.output",
+        "layout_recommendations": "steps.optimize_layout.output"
+      }
+    }
+  ]
+}
