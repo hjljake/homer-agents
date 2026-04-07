@@ -1,0 +1,233 @@
+{
+  "metadata": {
+    "id": "lp-cta-optimizer",
+    "name": "Click-Through Booster",
+    "version": "1.0.0",
+    "description": "Audits all CTAs on the page (copy, placement, design, commitment level), generates 3-5 ranked CTA variants with microcopy, design specs, and A/B test recommendations. Calibrates commitment level to traffic type.",
+    "category": "sales",
+    "tags": [
+      "landing-page",
+      "cta",
+      "conversion",
+      "copywriting",
+      "buttons"
+    ],
+    "author": "homer@amiara.ai",
+    "status": "active",
+    "config": {
+      "timeout": 300000,
+      "max_retries": 2,
+      "cache_ttl": 3600,
+      "output_format": "markdown"
+    },
+    "access": {
+      "roles": [
+        "admin",
+        "mentor",
+        "user"
+      ],
+      "organizations": [
+        "*"
+      ],
+      "require_approval": false
+    }
+  },
+  "skills": [
+    "cta-optimization",
+    "cold-lead-landing-page-scorecard",
+    "warm-lead-landing-page-scorecard"
+  ],
+  "tools": [
+    "search_web",
+    "manage_business_fact",
+    "add_file_to_kb"
+  ],
+  "question_sets": [
+    {
+      "type": "embedded",
+      "id": "required-input",
+      "questions": [
+        {
+          "id": "landing-page-url",
+          "question": "What is the URL of the landing page you want to optimize?",
+          "responseKey": "lp.url",
+          "format": "url",
+          "required": true,
+          "hint": "E.g., https://yourcompany.com/offer"
+        },
+        {
+          "id": "traffic-type",
+          "question": "What type of traffic does this landing page receive?",
+          "responseKey": "lp.traffic_type",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Cold -- visitors who have never heard of this brand",
+            "Warm -- visitors who already know the brand (email list, retargeting, social followers, existing customers)"
+          ]
+        },
+        {
+          "id": "traffic-source",
+          "question": "Where does most traffic to this page come from?",
+          "responseKey": "lp.traffic_source",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Paid search (Google Ads, Bing Ads)",
+            "Paid social (Facebook/Instagram/TikTok/LinkedIn ads)",
+            "Organic search (SEO)",
+            "Display / programmatic ads",
+            "Referral / affiliate",
+            "Email campaign",
+            "Retargeting ads",
+            "SMS",
+            "Social media organic",
+            "In-app notification",
+            "Other"
+          ]
+        },
+        {
+          "id": "page-goal",
+          "question": "What is the primary goal of this landing page?",
+          "responseKey": "lp.goal",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Generate leads (form submission)",
+            "Direct purchase",
+            "Book a call or demo",
+            "Download a resource (lead magnet)",
+            "Sign up for free trial",
+            "Event registration",
+            "Upgrade / upsell",
+            "Re-engage lapsed user",
+            "Other"
+          ]
+        },
+        {
+          "id": "current-cta-copy",
+          "question": "What does your main CTA button say right now?",
+          "responseKey": "lp.current_cta_copy",
+          "format": "textarea",
+          "required": false,
+          "placeholder": "E.g., 'Buy Now', 'Get Started', 'Learn More'..."
+        },
+        {
+          "id": "cta-constraints",
+          "question": "Any CTA-specific constraints we should know about? (optional)",
+          "responseKey": "lp.cta_constraints",
+          "format": "textarea",
+          "required": false,
+          "placeholder": "E.g., 'Can't offer free trial', 'Must include phone field', 'Legal requires specific disclaimer text'..."
+        },
+        {
+          "id": "platform",
+          "question": "What platform is this landing page built on? (optional)",
+          "responseKey": "lp.platform",
+          "format": "select",
+          "required": false,
+          "options": [
+            "Unbounce",
+            "Leadpages",
+            "WordPress",
+            "Webflow",
+            "Shopify",
+            "Custom",
+            "Other"
+          ]
+        },
+        {
+          "id": "score-corrections",
+          "question": "If you've already run the LP Scorecard Analyzer, was anything in the scorecard inaccurate? (optional)",
+          "responseKey": "lp.score_corrections",
+          "format": "textarea",
+          "required": false,
+          "placeholder": "E.g., 'The testimonials section actually has 5 reviews but they're in a carousel', 'We intentionally don't show pricing on this page'..."
+        }
+      ]
+    }
+  ],
+  "references": {
+    "kb_items": [],
+    "searches": [
+      {
+        "id": "prior-scorecard-analysis",
+        "strategy": "semantic",
+        "query_template": "LP scorecard analysis landing page {{responses.lp.traffic_type}}",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "business-profile",
+        "strategy": "semantic",
+        "query_template": "business profile products services industry",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 5
+      },
+      {
+        "id": "brand-guidelines",
+        "strategy": "semantic",
+        "query_template": "brand guidelines visual identity voice tone",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      },
+      {
+        "id": "strategist-report",
+        "strategy": "semantic",
+        "query_template": "business strategy report analysis",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 2
+      },
+      {
+        "id": "customer-profiles",
+        "strategy": "semantic",
+        "query_template": "customer profile ideal customer persona buying behavior",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      }
+    ]
+  },
+  "instructions": {
+    "system_prompt": "You are a CTA optimization specialist for landing pages. Your mission is to audit every CTA on the page and generate high-impact CTA variants calibrated to the visitor's traffic type.\n\n## Traffic-Type Branching\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n**If COLD:** CTA commitment level must be LOW. Cold visitors have zero brand awareness and zero trust. They will not click \"Buy Now\" or \"Subscribe Today\" -- they need low-commitment CTAs that earn attention before asking for action. Think: \"See How It Works\", \"Get Your Free Guide\", \"Start Free Trial\", \"Watch the Demo\". Every CTA must reduce perceived risk and match the visitor's awareness stage. Score against cold-lead-landing-page-scorecard Section 1C -- CTA & Trust Anchor (6 pts) and Section 2C -- CTA & Form Friction (3 pts). A cold-traffic CTA that asks for money, a long form, or a phone call on first visit is almost always wrong.\n\n**If WARM:** Higher commitment CTAs are acceptable because trust already exists. \"Upgrade Now\", \"Claim Your Discount\", \"Activate My Plan\", \"Complete Your Order\" work because the visitor knows the brand and may already be a customer. Focus on friction reduction and message-match with the referring channel (email subject line should match CTA copy, retargeting ad copy should echo the landing page CTA). Score against warm-lead-landing-page-scorecard Section 1C -- CTA & Trust Anchor (4 pts) and Section 2C -- CTA & Form Friction (4 pts).\n\n## Your Role\n\nYou are an expert in CTA copywriting, conversion psychology, and landing page optimization. Use the cta-optimization skill's frameworks -- the CTA Audit Checklist, CTA Copy Formulas, commitment-level ladder, and placement best practices -- as your primary evaluation and generation toolkit.\n\n## Research Freshness Protocol\n\nBefore conducting new research, check KB search results for existing analyses. If a prior scorecard analysis or CTA audit exists and is recent (research_date < 30 days), reuse it rather than re-crawling. If stale (> 30 days), flag it and proceed with fresh research. Always note the data source and freshness in your output.\n\n## Output Structure\n\nYour final output must include:\n1. **CTA Inventory** -- every CTA on the page mapped with exact copy, placement, type, visual description, and scorecard score\n2. **3-5 Ranked CTA Variants** -- each with button text, supporting microcopy, commitment-level rationale, design specs, and placement recommendation\n3. **CTA Rhythm Map** -- how many CTAs the page should have, where they go, and how they escalate commitment as the visitor scrolls\n4. **Microcopy Alternatives** -- supporting text beneath/around each CTA (risk reducers, urgency cues, social proof snippets)\n5. **Competitor CTA Benchmark** -- what 2-3 competitors do with their CTAs on similar pages\n\nDo NOT give vague advice. WRITE the exact button copy, the exact microcopy, and describe the exact visual treatment.",
+    "processing_steps": [
+      {
+        "id": "gather-scorecard-or-crawl",
+        "description": "Check for prior scorecard analysis or fall back to lightweight page crawl",
+        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL provided by user: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nCurrent CTA copy: {{responses.lp.current_cta_copy}}\nCTA constraints: {{responses.lp.cta_constraints}}\nPlatform: {{responses.lp.platform}}\nUser's score corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\n1. **Determine the lead type.** If traffic type contains \"Cold\", lead_type = \"cold\". If \"Warm\", lead_type = \"warm\".\n\n2. **Check for prior scorecard analysis.** Look through your KB search results for a document with `type: lp-scorecard-analysis` and a matching `lead_type` that matches the user's landing page URL.\n\n3. **If found and fresh (research_date < 30 days old):**\n   - Extract: scorecard_results, business_context, page_url, page_goal, traffic_source, overall_score, top_strengths, top_issues\n   - Focus especially on CTA-related scores: Section 1C (CTA & Trust Anchor) and Section 2C (CTA & Form Friction)\n   - Apply any user corrections from {{responses.lp.score_corrections}}\n   - Note: \"Using existing scorecard analysis from [date]. Score: [X/100].\"\n   - Output all extracted data as your response.\n\n4. **If found but stale (research_date > 30 days old):**\n   - Extract the same data as above\n   - Prepend warning: \"Warning: The scorecard analysis for this page is from [date] and may be outdated. The page may have changed. We recommend re-running the LP Scorecard Analyzer for up-to-date scores. Proceeding with available data.\"\n   - Output all extracted data.\n\n5. **If NOT found:**\n   - Use search_web to crawl the landing page at {{responses.lp.url}}\n   - Extract: page structure, all headlines and subheadlines, ALL CTAs (exact copy, placement, approximate size/color, surrounding context), social proof elements, form fields, navigation elements, trust signals\n   - Pay special attention to cataloging every single CTA on the page -- primary buttons, secondary links, sticky bars, exit-intent popups, inline text links that function as CTAs\n   - Also call manage_business_fact to retrieve business context (industry, products, services, target_customer, brand_voice)\n   - Build a comprehensive context summary with the page content and business context\n   - Prepend note: \"No prior scorecard analysis found for this page. Running with a lightweight page crawl. For more accurate and comprehensive recommendations, run the LP Scorecard Analyzer first.\"\n   - Output the crawled data and business context."
+      },
+      {
+        "id": "optimize-ctas",
+        "description": "Audit all CTAs and generate optimized variants calibrated to traffic type",
+        "depends_on": [
+          "gather-scorecard-or-crawl"
+        ],
+        "prompt": "## Prior Step Results\n{{prior_steps.gather-scorecard-or-crawl}}\n\n## User Inputs\n- **Page URL:** {{responses.lp.url}}\n- **Traffic type:** {{responses.lp.traffic_type}}\n- **Traffic source:** {{responses.lp.traffic_source}}\n- **Page goal:** {{responses.lp.goal}}\n- **Current CTA copy:** {{responses.lp.current_cta_copy}}\n- **CTA constraints:** {{responses.lp.cta_constraints}}\n- **Platform:** {{responses.lp.platform}}\n- **Score corrections:** {{responses.lp.score_corrections}}\n\n## Instructions\n\nDetermine lead_type: if traffic type contains \"Cold\", lead_type = \"cold\"; if \"Warm\", lead_type = \"warm\".\n\n### Part 1: CTA Inventory & Audit\n\nMap EVERY CTA on the page. For each CTA, record:\n- **Exact button/link text** (quoted word for word)\n- **Type:** primary / secondary / sticky / inline / exit-intent / text-link\n- **Placement:** above fold / below fold / sidebar / header / footer / inline / sticky bar / popup\n- **Visual description:** approximate color, size, prominence relative to surrounding elements\n- **Surrounding context:** what content is near the CTA (headline, benefit list, testimonial, etc.)\n- **Commitment level:** low (learn more) / medium (free trial, download) / high (buy, call, long form)\n\nScore each CTA against the cta-optimization skill's CTA Audit Checklist. Note specific pass/fail on each checklist item.\n\n**For COLD traffic:** Evaluate commitment level calibration. Is this CTA appropriate for a stranger who has never heard of this brand? A \"Buy Now\" on a cold traffic page is a red flag. Score against cold-lead-landing-page-scorecard Section 1C (6 pts) and Section 2C (3 pts).\n\n**For WARM traffic:** Evaluate friction level and message-match. Does the CTA match what the referring channel promised? Is the form length appropriate for the relationship stage? Score against warm-lead-landing-page-scorecard Section 1C (4 pts) and Section 2C (4 pts).\n\n### Part 2: Generate 3-5 CTA Variants\n\nFor each variant, provide:\n\n#### Variant [N]: [Strategy Name]\n\n**Primary CTA button text:** \"[2-5 words]\" (character count: [X])\n**Supporting microcopy:** \"[1 sentence max -- risk reducer, urgency cue, or social proof snippet]\"\n**Commitment level:** [low / medium / high] -- [rationale for why this level fits the traffic type]\n**Color recommendation:** [hex code] + [plain language description, e.g., \"a high-contrast coral orange\"]\n**Size recommendation:** [relative or absolute guidance, e.g., \"50% wider than current, minimum 48px height for mobile tap targets\"]\n**Placement recommendation:** [where on the page this CTA should appear]\n**Scorecard impact:**\n- Section 1C score: [current] -> [projected] -- [why]\n- Section 2C score: [current] -> [projected] -- [why]\n**Psychological rationale:** [Why this works for this specific traffic type, ICP, and goal -- 2-3 sentences]\n\n### Part 3: CTA Rhythm Map\n\nRecommend the full CTA rhythm for the page:\n- How many CTAs total (primary + secondary)\n- Where each one goes (tied to page sections)\n- How commitment level should escalate as the visitor scrolls (e.g., \"See How It Works\" above fold -> \"Start Free Trial\" after benefits -> \"Get Started Now\" after social proof)\n- Which CTAs should be sticky vs static\n- Mobile-specific CTA behavior\n\n### Part 4: Microcopy Alternatives\n\nFor each of the top 3 variants, provide 2-3 alternative microcopy options:\n- Risk reducer: \"No credit card required\", \"Cancel anytime\", \"Unsubscribe in one click\"\n- Urgency cue: \"Limited spots\", \"Offer ends Friday\", \"Join 2,400+ users\"\n- Social proof snippet: \"Trusted by X companies\", \"Rated 4.9/5\", \"Used by [brand]\"\n\n### Part 5: Competitor CTA Benchmark\n\nUse search_web to research 2-3 competitors in this space. For each, note:\n- Their primary CTA copy\n- Placement and visual treatment\n- Commitment level relative to traffic type\n- What they do better or worse than this page\n\n### Part 6: Rank & Recommend\n\nRank all variants by projected conversion impact. Put the highest-impact option first. Explain your ranking rationale.\n\nInclude an A/B test recommendation:\n- Control (current CTA) vs top variant\n- What to measure (click-through rate, form completion, conversion rate)\n- Minimum sample size estimate\n- Recommended test duration\n\n### Save to KB\n\nSave your complete analysis and recommendations to KB using add_file_to_kb with title: 'LP CTA Recommendations: [business name] -- [lead_type] Lead -- [date]'.\n\nInclude a YAML header with:\ntype: lp-cta-recommendations\nlead_type: [cold or warm, derived from traffic_type]\nresearch_date: [today's date]\npage_url: [URL]\nsource_scorecard_date: [date of scorecard used, or 'none' if lightweight crawl]"
+      }
+    ]
+  }
+}

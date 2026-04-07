@@ -1,0 +1,249 @@
+{
+  "metadata": {
+    "id": "lp-icp-optimizer",
+    "name": "Customer Resonance Audit",
+    "version": "1.0.0",
+    "description": "Audits every element on the landing page against the target ICP profile — evaluates language match, specificity, self-selection mechanics, proof alignment, and objection mapping. Adapts for traffic type: cold traffic focuses on ICP identification and differentiation, warm traffic focuses on segment-specific messaging and personalization.",
+    "category": "analysis",
+    "tags": [
+      "landing-page",
+      "icp",
+      "positioning",
+      "personalization",
+      "cold-lead",
+      "warm-lead"
+    ],
+    "author": "homer@amiara.ai",
+    "status": "active",
+    "config": {
+      "timeout": 300000,
+      "max_retries": 2,
+      "cache_ttl": 3600,
+      "output_format": "markdown"
+    },
+    "access": {
+      "roles": [
+        "admin",
+        "mentor",
+        "user"
+      ],
+      "organizations": [
+        "*"
+      ],
+      "require_approval": false
+    }
+  },
+  "skills": [
+    "lp-icp-positioning",
+    "cold-lead-landing-page-scorecard",
+    "warm-lead-landing-page-scorecard"
+  ],
+  "tools": [
+    "search_web",
+    "retrieve_reference_content",
+    "manage_business_fact",
+    "add_file_to_kb"
+  ],
+  "question_sets": [
+    {
+      "type": "embedded",
+      "id": "required-input",
+      "questions": [
+        {
+          "id": "landing-page-url",
+          "question": "What is the URL of the landing page you want to optimize?",
+          "responseKey": "lp.url",
+          "format": "url",
+          "required": true,
+          "hint": "E.g., https://yourcompany.com/offer"
+        },
+        {
+          "id": "traffic-type",
+          "question": "What type of traffic does this page primarily receive?",
+          "responseKey": "lp.traffic_type",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Cold — visitors who have never heard of this brand",
+            "Warm — visitors who already know the brand (email list, retargeting, social followers, existing customers)"
+          ]
+        },
+        {
+          "id": "traffic-source",
+          "question": "Where does most traffic to this page come from?",
+          "responseKey": "lp.traffic_source",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Paid search (Google Ads, Bing Ads)",
+            "Paid social (Facebook/Instagram/TikTok/LinkedIn ads)",
+            "Organic search (SEO)",
+            "Display / programmatic ads",
+            "Referral / affiliate",
+            "Email campaign",
+            "Retargeting ads",
+            "SMS / text campaign",
+            "Social media (organic, to existing followers)",
+            "In-app / product notification",
+            "Other"
+          ]
+        },
+        {
+          "id": "page-goal",
+          "question": "What is the primary goal of this landing page?",
+          "responseKey": "lp.goal",
+          "format": "select",
+          "required": true,
+          "options": [
+            "Generate leads (form submission)",
+            "Direct purchase",
+            "Book a call or demo",
+            "Download a resource (lead magnet)",
+            "Sign up for free trial",
+            "Event registration",
+            "Upgrade / upsell existing customer",
+            "Re-engage lapsed user",
+            "Other"
+          ]
+        },
+        {
+          "id": "referring-message",
+          "question": "For warm traffic: what message or promise brought them to this page?",
+          "responseKey": "lp.referring_message",
+          "format": "textarea",
+          "required": false,
+          "placeholder": "E.g., 'Your exclusive 30% off — this weekend only', 'You're invited to upgrade to Pro'..."
+        },
+        {
+          "id": "visitor-relationship",
+          "question": "For warm traffic: what is the visitor's relationship with your brand?",
+          "responseKey": "lp.visitor_relationship",
+          "format": "select",
+          "required": false,
+          "options": [
+            "Email subscriber (never purchased)",
+            "Free trial / freemium user",
+            "Existing paying customer",
+            "Lapsed / churned customer",
+            "Social media follower",
+            "Event attendee / webinar registrant",
+            "Other"
+          ]
+        },
+        {
+          "id": "score-corrections",
+          "question": "If you've already run the LP Scorecard Analyzer, was anything in the scorecard inaccurate? (optional)",
+          "responseKey": "lp.score_corrections",
+          "format": "textarea",
+          "required": false
+        },
+        {
+          "id": "priority-sections",
+          "question": "Which areas are most important to optimize? (optional — pick 2-3)",
+          "responseKey": "lp.priority_sections",
+          "format": "multiselect",
+          "required": false,
+          "options": [
+            "Hero Section (headline, subheadline, CTA, trust anchor)",
+            "Below-the-Fold Sequence (body content, benefit framing)",
+            "Social Proof (testimonials, logos, case studies, numbers)",
+            "Offer Clarity (what you get, pricing, risk reversal)",
+            "Mobile Experience",
+            "Brand Identity & Design",
+            "Technical & Trust Fundamentals"
+          ]
+        },
+        {
+          "id": "optimization-constraints",
+          "question": "Any constraints we should know about? (optional)",
+          "responseKey": "lp.optimization_constraints",
+          "format": "textarea",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "references": {
+    "kb_items": [],
+    "searches": [
+      {
+        "id": "prior-scorecard-analysis",
+        "strategy": "semantic",
+        "query_template": "LP scorecard analysis landing page {{responses.lp.traffic_type}}",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "business-profile",
+        "strategy": "semantic",
+        "query_template": "business profile products services industry",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 5
+      },
+      {
+        "id": "brand-guidelines",
+        "strategy": "semantic",
+        "query_template": "brand guidelines visual identity voice tone",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      },
+      {
+        "id": "strategist-report",
+        "strategy": "semantic",
+        "query_template": "business strategy report analysis",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 2
+      },
+      {
+        "id": "customer-profiles",
+        "strategy": "semantic",
+        "query_template": "customer profile ideal customer persona buying behavior",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      }
+    ]
+  },
+  "instructions": {
+    "system_prompt": "You are an ICP positioning specialist for landing pages. Your job is to audit every element on the page and evaluate how well it speaks to the target visitor.\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n## Traffic Type Framework\n\nIf COLD traffic: ICP positioning is about IDENTIFICATION and DIFFERENTIATION. The visitor must self-select in 3 seconds. Every element should speak to a specific person with a specific problem — not a broad audience. Use the lp-icp-positioning skill's 5-dimension audit framework with cold emphasis:\n1. Language Match — does the copy use the ICP's words, not internal jargon?\n2. Specificity Level — is it specific enough that the wrong person self-selects OUT?\n3. Self-Selection Mechanics — can the ICP identify themselves within 3 seconds?\n4. Proof Alignment — are testimonials from people the ICP would identify with?\n5. Objection Mapping — does it address cold-specific objections (\"Is this legit?\" \"Will it work for me?\")\n\nIf WARM traffic: ICP positioning is about ACKNOWLEDGMENT and SPECIFICITY. The visitor already self-selected when they subscribed/purchased/followed. Now the page must demonstrate the brand knows them. Use the 5-dimension framework with warm emphasis:\n1. Language Match — does the copy reflect their segment's specific needs, not generic messaging?\n2. Specificity Level — does it speak to their specific relationship tier (subscriber vs customer vs churned)?\n3. Self-Selection Mechanics — does the page confirm they're in the right place?\n4. Proof Alignment — are testimonials from peers in the same segment/situation?\n5. Objection Mapping — does it address warm-specific objections (\"Is the upgrade worth it?\" \"Will this disrupt my setup?\")\n\nFor warm traffic, also evaluate PERSONALIZATION OPPORTUNITIES — where could the page inject the visitor's name, usage data, or segment info?",
+    "processing_steps": [
+      {
+        "id": "gather-scorecard-or-crawl",
+        "description": "Check for prior scorecard analysis or fall back to lightweight page crawl",
+        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nUser's score corrections: {{responses.lp.score_corrections}}\nUser's priority sections: {{responses.lp.priority_sections}}\nUser's constraints: {{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Check for prior scorecard analysis.** Look for `type: lp-scorecard-analysis` matching the URL and traffic type.\n\n2. **If found and fresh (< 30 days):** Extract scorecard_results, business_context, overall_score, top_strengths, top_issues. Apply user corrections.\n\n3. **If found but stale (> 30 days):** Extract same data, prepend staleness warning.\n\n4. **If NOT found:** Use search_web to crawl the page. Call manage_business_fact for business context. Prepend note recommending the LP Scorecard Analyzer."
+      },
+      {
+        "id": "audit-icp-positioning",
+        "description": "Audit every page element against the target visitor profile and generate repositioning recommendations",
+        "depends_on": [
+          "gather-scorecard-or-crawl"
+        ],
+        "prompt": "## Scorecard Results\n{{prior_steps.gather-scorecard-or-crawl.content}}\n\n## Page URL\n{{responses.lp.url}}\n\n## Traffic Type\n{{responses.lp.traffic_type}}\n\n## Page Goal\n{{responses.lp.goal}}\n\n## Traffic Source\n{{responses.lp.traffic_source}}\n\n## Referring Message\n{{responses.lp.referring_message}}\n\n## Visitor Relationship\n{{responses.lp.visitor_relationship}}\n\n## User Corrections\n{{responses.lp.score_corrections}}\n\n## Priority Sections\n{{responses.lp.priority_sections}}\n\n## Constraints\n{{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Define the visitor profile.** Based on business context, traffic type, and visitor relationship:\n   - For cold: Who is the ICP? Role, industry, revenue range, pain point. What language do they use? What competitors are they comparing?\n   - For warm: What is their relationship tier? What do they already know? What have they already experienced? What language level are they at (more informed than cold)?\n\n2. **Audit each page element against the 5 dimensions.** For each element:\n\n**[Element Name]**\n- Current: \"[exact text or description]\"\n- Language Match: [0/1/2] — [assessment]\n- Specificity: [0/1/2] — [assessment]\n- Self-Selection: [0/1/2] — [assessment]\n- Proof Alignment: [0/1/2] — [assessment]\n- Objection Mapping: [0/1/2] — [assessment]\n- **Overall ICP alignment:** [Aligned / Partially Aligned / Misaligned]\n- **Rewrite (if misaligned):** \"[exact replacement text]\"\n- For warm traffic: **Personalization opportunity:** [where to inject dynamic content]\n\n3. **For warm traffic: map personalization opportunities.** Name injection points, usage data displays, segment-specific conditional content, pre-filled form fields.\n\n4. **Calculate overall ICP positioning score** (X/10).\n\n5. **Map to scorecard impact.** Show which scorecard sections would improve.\n\n6. **Rank top 5 recommendations by conversion impact.**\n\n## Output\n\nLabel your output **icp_recommendations** including:\n- Visitor profile definition\n- Overall ICP positioning score (X/10)\n- Element-by-element audit results\n- Personalization opportunity map (warm only)\n- Top 5 ranked recommendations\n- Specific copy rewrites for every misaligned element\n- Projected scorecard improvements\n\nSave to KB with title: 'LP ICP Recommendations: [business name] — {{responses.lp.traffic_type}} — [date]'.\n\nYAML header:\ntype: lp-icp-recommendations\nlead_type: {{responses.lp.traffic_type}}\nresearch_date: [today's date]\npage_url: [URL]\nicp_score: [X/10]\nsource_scorecard_date: [date of scorecard used, or \"none\"]"
+      }
+    ]
+  }
+}
