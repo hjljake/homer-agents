@@ -9,7 +9,7 @@ homer-agents/
 ├── upsell-advisor/                    3-agent workflow — gather context, research, deepen strategy
 ├── website-setup-advisor/             Single agent — platform recommendation + setup guide
 │
-│   LANDING PAGE SUITE (9 unified agents — each handles both cold + warm traffic)
+│   LANDING PAGE SUITE (10 unified agents — each handles both cold + warm traffic)
 ├── lp-scorecard-analyzer/             Standalone — score LP against traffic-appropriate scorecard (100 pts)
 ├── lp-headline-optimizer/             Standalone — generate optimized headline/subheadline combos
 ├── lp-icp-optimizer/                  Standalone — audit every element against the ICP
@@ -17,6 +17,7 @@ homer-agents/
 ├── lp-cta-optimizer/                  Standalone — audit all CTAs, generate variants + rhythm map
 ├── lp-social-proof-optimizer/         Standalone — catalog proof, score, generate sourcing plan
 ├── lp-mobile-experience-auditor/      Standalone — deep 12-dimension mobile audit
+├── lp-funnel-auditor/                 Standalone — full-funnel audit: awareness → click → LP → conversion → post-conversion
 ├── lp-copy-full-page-writer/          Standalone — write complete LP copy from scratch (no existing page needed)
 ├── lp-ab-variant-builder/             Standalone — synthesize all optimizer outputs into 2 A/B variants
 ```
@@ -25,7 +26,7 @@ homer-agents/
 
 ## Standalone LP Agents — KB Data Flow
 
-The 9 LP agents share data via the Knowledge Base. Each agent saves structured output with predictable titles and YAML headers. Downstream agents discover upstream data via `references.searches`. All agents handle both cold and warm traffic via a `traffic_type` question.
+The 10 LP agents share data via the Knowledge Base. Each agent saves structured output with predictable titles and YAML headers. Downstream agents discover upstream data via `references.searches`. All agents handle both cold and warm traffic via a `traffic_type` question.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -103,6 +104,17 @@ The 9 LP agents share data via the Knowledge Base. Each agent saves structured o
   │  Writes complete LP copy, self-scores against         │
   │  the traffic-appropriate scorecard.                   │
   └──────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────┐
+  │  FUNNEL AUDITOR (standalone, reads ALL upstream)       │
+  │                                                       │
+  │  Maps the full journey: awareness → click → LP →      │
+  │  conversion → post-conversion.                        │
+  │  Searches KB for ALL LP suite outputs to incorporate  │
+  │  into the landing page stage of the funnel audit.     │
+  │  Scores 10-dimension funnel continuity rubric (X/20). │
+  │  Identifies leakiest handoff + stage-by-stage fixes.  │
+  └──────────────────────────────────────────────────────┘
 ```
 
 ### KB Title Patterns & YAML Headers
@@ -116,6 +128,7 @@ The 9 LP agents share data via the Knowledge Base. Each agent saves structured o
 | CTA Optimizer | `LP CTA Recommendations: {biz} — {cold/warm} Lead — {date}` | `lp-cta-recommendations` |
 | Social Proof Optimizer | `LP Social Proof Recommendations: {biz} — {cold/warm} Lead — {date}` | `lp-social-proof-recommendations` |
 | Mobile Experience Auditor | `LP Mobile Audit: {biz} — {cold/warm} — {date}` | `lp-mobile-recommendations` |
+| Funnel Auditor | `Funnel Audit: {biz} — {funnel_type} — {date}` | `funnel-continuity-audit` |
 | Copy Full-Page Writer | `LP Copy Draft: {biz} — {cold/warm} — {date}` | `lp-copy-draft` |
 | A/B Variant Builder | `LP Optimization Variant {A/B}: {biz} — {cold/warm} — {date}` | `landing-page-ab-variant` |
 
