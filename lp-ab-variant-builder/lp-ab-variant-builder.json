@@ -251,6 +251,42 @@
         "limit": 1
       },
       {
+        "id": "prior-funnel-audit",
+        "strategy": "semantic",
+        "query_template": "funnel continuity audit conversion journey",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-copy-draft",
+        "strategy": "semantic",
+        "query_template": "LP copy draft landing page {{responses.lp.traffic_type}}",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.7
+        },
+        "limit": 1
+      },
+      {
+        "id": "brand-guidelines",
+        "strategy": "semantic",
+        "query_template": "brand guidelines visual identity voice tone",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      },
+      {
         "id": "business-profile",
         "strategy": "semantic",
         "query_template": "business profile products services industry",
@@ -294,7 +330,7 @@
       {
         "id": "gather-all-upstream",
         "description": "Search KB for scorecard and all optimizer outputs, assess data completeness",
-        "prompt": "Check your KB search results for prior analyses and recommendations for this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\nSearch the KB for ALL of the following, matching the traffic type and URL:\n\n1. **Scorecard Analysis** (type: lp-scorecard-analysis) — Extract: scorecard_results, overall_score, business_context, top_strengths, top_issues. For warm: also message_match_assessment.\n2. **Headline Recommendations** (type: lp-headline-recommendations) — Extract: header_recommendations\n3. **ICP Recommendations** (type: lp-icp-recommendations) — Extract: icp_recommendations\n4. **Layout Recommendations** (type: lp-layout-recommendations) — Extract: layout_recommendations\n5. **Social Proof Recommendations** (type: lp-social-proof-recommendations) — Extract if available\n6. **CTA Recommendations** (type: lp-cta-recommendations) — Extract if available\n7. **Mobile Audit** (type: lp-mobile-recommendations) — Extract: mobile_score, main_scorecard_s5_score, prioritized mobile fixes, in-app browser issues, speed metrics\n\nFor each, check research_date (< 30 days = fresh, > 30 days = stale warning).\n\nAlso call manage_business_fact for business context.\n\nIf scorecard is missing, crawl the page with search_web as fallback.\n\n## Output\n\nStructured summary:\n- For each data source: found/not found, date, key data\n- degradation_mode: \"full\" / \"partial\" / \"scorecard-only\" / \"crawl-only\"\n- missing_inputs: list of what's missing"
+        "prompt": "Check your KB search results for prior analyses and recommendations for this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\nSearch the KB for ALL of the following, matching the traffic type and URL:\n\n1. **Scorecard Analysis** (type: lp-scorecard-analysis) — Extract: scorecard_results, overall_score, business_context, top_strengths, top_issues. For warm: also message_match_assessment.\n2. **Headline Recommendations** (type: lp-headline-recommendations) — Extract: header_recommendations\n3. **ICP Recommendations** (type: lp-icp-recommendations) — Extract: icp_recommendations\n4. **Layout Recommendations** (type: lp-layout-recommendations) — Extract: layout_recommendations\n5. **Social Proof Recommendations** (type: lp-social-proof-recommendations) — Extract if available\n6. **CTA Recommendations** (type: lp-cta-recommendations) — Extract if available\n7. **Mobile Audit** (type: lp-mobile-recommendations) — Extract: mobile_score, main_scorecard_s5_score, prioritized mobile fixes, in-app browser issues, speed metrics\n8. **Funnel Audit** (type: funnel-continuity-audit) — Extract: funnel_score, leakiest_handoff, stage-by-stage recommendations, message continuity findings, promise chain\n9. **Copy Draft** (type: lp-copy-draft) — Extract: full page copy, framework used, self_score. Use as variant baseline if no existing page URL.\n\nFor each, check research_date (< 30 days = fresh, > 30 days = stale warning).\n\nAlso call manage_business_fact for business context.\n\nIf scorecard is missing, crawl the page with search_web as fallback.\n\n## Output\n\nStructured summary:\n- For each data source: found/not found, date, key data\n- degradation_mode: \"full\" / \"partial\" / \"scorecard-only\" / \"crawl-only\"\n- missing_inputs: list of what's missing"
       },
       {
         "id": "competitive-scan",

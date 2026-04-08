@@ -190,7 +190,7 @@
           "content_type": [
             "document"
           ],
-          "min_similarity": 0.7
+          "min_similarity": 0.75
         },
         "limit": 2
       },

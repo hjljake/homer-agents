@@ -368,6 +368,42 @@
         "limit": 1
       },
       {
+        "id": "prior-ab-variants",
+        "strategy": "semantic",
+        "query_template": "LP optimization variant A/B test",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 2
+      },
+      {
+        "id": "prior-copy-draft",
+        "strategy": "semantic",
+        "query_template": "LP copy draft landing page",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.7
+        },
+        "limit": 1
+      },
+      {
+        "id": "brand-guidelines",
+        "strategy": "semantic",
+        "query_template": "brand guidelines visual identity voice tone",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.6
+        },
+        "limit": 3
+      },
+      {
         "id": "prior-layout-recommendations",
         "strategy": "semantic",
         "query_template": "LP layout recommendations",

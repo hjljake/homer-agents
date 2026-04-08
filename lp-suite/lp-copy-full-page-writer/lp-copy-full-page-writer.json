@@ -254,6 +254,90 @@
           "min_similarity": 0.65
         },
         "limit": 3
+      },
+      {
+        "id": "prior-scorecard-analysis",
+        "strategy": "semantic",
+        "query_template": "LP scorecard analysis landing page",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-headline-recommendations",
+        "strategy": "semantic",
+        "query_template": "LP headline recommendations",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-icp-recommendations",
+        "strategy": "semantic",
+        "query_template": "LP ICP positioning recommendations",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-layout-recommendations",
+        "strategy": "semantic",
+        "query_template": "LP layout recommendations",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-cta-recommendations",
+        "strategy": "semantic",
+        "query_template": "LP CTA recommendations",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-social-proof-recommendations",
+        "strategy": "semantic",
+        "query_template": "LP social proof recommendations",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
+      },
+      {
+        "id": "prior-funnel-audit",
+        "strategy": "semantic",
+        "query_template": "funnel continuity audit conversion journey",
+        "filters": {
+          "content_type": [
+            "document"
+          ],
+          "min_similarity": 0.75
+        },
+        "limit": 1
       }
     ]
   },
