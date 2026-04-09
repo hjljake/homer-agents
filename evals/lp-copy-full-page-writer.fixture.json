@@ -1,0 +1,93 @@
+{
+  "agent_id": "lp-copy-full-page-writer",
+  "test_cases": [
+    {
+      "test_id": "copy-cold-all-optimizers",
+      "description": "Cold traffic full-page copy with all optimizer outputs in KB -- should incorporate headline, ICP, layout, CTA, social proof, and funnel insights",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output"
+          },
+          {
+            "yaml_type": "lp-headline-recommendations",
+            "title_pattern": "LP Headline Recommendations:.*Cold.*",
+            "description": "Headline optimizer output with ranked combos"
+          },
+          {
+            "yaml_type": "lp-icp-recommendations",
+            "title_pattern": "LP ICP Recommendations:.*Cold.*",
+            "description": "ICP optimizer output with element-by-element rewrites"
+          },
+          {
+            "yaml_type": "lp-layout-recommendations",
+            "title_pattern": "LP Layout Recommendations:.*Cold.*",
+            "description": "Layout optimizer output with section map and CTA rhythm"
+          },
+          {
+            "yaml_type": "lp-cta-recommendations",
+            "title_pattern": "LP CTA Recommendations:.*Cold.*Lead.*",
+            "description": "CTA optimizer output with variants and rhythm map"
+          },
+          {
+            "yaml_type": "lp-social-proof-recommendations",
+            "title_pattern": "LP Social Proof Recommendations:.*Cold.*Lead.*",
+            "description": "Social proof optimizer output with distribution map"
+          },
+          {
+            "yaml_type": "funnel-continuity-audit",
+            "title_pattern": "Funnel Audit:.*Paid search.*",
+            "description": "Funnel auditor output with promise chain"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["hero_copy", "below_the_fold_copy", "social_proof_sections", "cta_sections", "footer_copy", "design_notes", "self_score"],
+        "copy_spans_hero_to_footer": true,
+        "design_notes_per_section": true,
+        "self_score_present": true,
+        "framework_used": ["PAS", "AIDA", "BAB"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Copy Draft:.*Cold.*",
+        "yaml_type": "lp-copy-draft",
+        "yaml_fields_present": ["page_type", "framework", "self_score", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "copy-warm-standalone",
+      "description": "Warm traffic full-page copy with no prior analysis -- tests standalone copy generation from user inputs alone",
+      "inputs": {
+        "lp.url": "https://example-crm.com/upgrade-pro",
+        "lp.traffic_type": "Warm -- visitors who already know this brand or are existing customers",
+        "lp.traffic_source": "Email campaign",
+        "lp.goal": "Upgrade to a paid plan or higher tier"
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["hero_copy", "below_the_fold_copy", "social_proof_sections", "cta_sections", "footer_copy", "design_notes", "self_score"],
+        "copy_spans_hero_to_footer": true,
+        "design_notes_per_section": true,
+        "self_score_present": true,
+        "framework_used": ["PAS", "AIDA", "BAB"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Copy Draft:.*Warm.*",
+        "yaml_type": "lp-copy-draft",
+        "yaml_fields_present": ["page_type", "framework", "self_score", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

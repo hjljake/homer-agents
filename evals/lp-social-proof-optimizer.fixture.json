@@ -1,0 +1,67 @@
+{
+  "agent_id": "lp-social-proof-optimizer",
+  "test_cases": [
+    {
+      "test_id": "proof-cold-no-existing",
+      "description": "Cold traffic social proof audit with no existing proof assets on the page -- tests sourcing plan generation",
+      "inputs": {
+        "lp.url": "https://example-startup.com/early-access",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+        "lp.goal": "Sign up for a free trial"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["proof_inventory", "proof_distribution_map", "sourcing_plan", "competitor_analysis", "current_proof_score", "projected_proof_score"],
+        "proof_inventory_note": "empty or minimal -- page lacks existing proof",
+        "sourcing_plan_present": true,
+        "score_fields": ["current_proof_score", "projected_proof_score"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Social Proof Recommendations:.*Cold.*Lead.*",
+        "yaml_type": "lp-social-proof-recommendations",
+        "yaml_fields_present": ["current_proof_score", "projected_proof_score", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "proof-warm-existing",
+      "description": "Warm traffic social proof audit with existing testimonials on the page -- tests proof optimization and redistribution",
+      "inputs": {
+        "lp.url": "https://example-crm.com/upgrade-pro",
+        "lp.traffic_type": "Warm -- visitors who already know this brand or are existing customers",
+        "lp.traffic_source": "Email campaign",
+        "lp.goal": "Upgrade to a paid plan or higher tier"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Warm.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer (warm)"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["proof_inventory", "proof_distribution_map", "sourcing_plan", "competitor_analysis", "current_proof_score", "projected_proof_score"],
+        "proof_inventory_note": "should catalog existing testimonials found on page",
+        "redistribution_recommendations": true,
+        "score_fields": ["current_proof_score", "projected_proof_score"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Social Proof Recommendations:.*Warm.*Lead.*",
+        "yaml_type": "lp-social-proof-recommendations",
+        "yaml_fields_present": ["current_proof_score", "projected_proof_score", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

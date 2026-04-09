@@ -1,0 +1,144 @@
+{
+  "agent_id": "blog-post-writer",
+  "description": "Test fixtures for the Blog Post Writer agent — a single GPA with research-and-audit + write-variants processing steps. Tests both the existing-blog path (style matching) and the no-website early-exit path.",
+  "test_cases": [
+    {
+      "test_id": "blog-existing-site",
+      "description": "User has an active blog and wants a new SEO-optimized post that matches their existing writing style — tests full research-audit-write pipeline with style matching enabled",
+      "inputs": {
+        "responses": {
+          "blog": {
+            "website_status": "Yes — I have a website with an active blog",
+            "existing_url": "https://example-greenroast.com/blog",
+            "match_style": true,
+            "topic": "How small-batch coffee roasters can compete with major brands on customer experience and loyalty programs",
+            "audience": "Independent coffee roasters and specialty coffee shop owners doing $200K-$2M in annual revenue",
+            "goal": "Drive organic search traffic",
+            "tone": "Conversational and approachable",
+            "length": "Long-form (2000-3000 words)",
+            "keywords": "small batch coffee roaster marketing, coffee shop loyalty program, specialty coffee customer experience"
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "Keyword Hotlist",
+          "Competitive Content Landscape",
+          "Reader Persona",
+          "Recommended Angle",
+          "Variant A",
+          "Variant B",
+          "Variant C",
+          "Recommendation"
+        ],
+        "processing_step_outputs": {
+          "research-and-audit": [
+            "Blog Audit Summary",
+            "research_date",
+            "coffee",
+            "keyword"
+          ],
+          "write-variants": [
+            "Variant A",
+            "Data-Led",
+            "Variant B",
+            "Story-Led",
+            "Variant C",
+            "How-To",
+            "meta description",
+            "URL slug"
+          ]
+        },
+        "per_variant_fields": [
+          "Suggested title",
+          "Meta description",
+          "URL slug",
+          "Pros and cons",
+          "Search potential assessment"
+        ]
+      },
+      "output_must_not_contain": [
+        "you don't have a website",
+        "Website Setup Advisor",
+        "need a home before content can be effective",
+        "run the Website Setup Advisor agent"
+      ],
+      "kb_save_check": {
+        "expected_saves": [
+          {
+            "title_pattern": "Blog Research: .* coffee .* \\d{4}",
+            "tool": "add_file_to_kb",
+            "min_length": 500,
+            "must_contain_yaml_header": ["research_date", "topic", "type: blog-market-research"]
+          }
+        ],
+        "expected_artifacts": [
+          {
+            "title_pattern": "Blog Post Variants: .* coffee",
+            "tool": "create_document_artifact"
+          }
+        ],
+        "expected_business_facts": []
+      },
+      "validation_checks": {
+        "input_rules_pass": {
+          "responses.blog.topic": { "min_length": 10, "value_length": 97 },
+          "responses.blog.audience": { "min_length": 10, "value_length": 88 },
+          "responses.blog.goal": { "required": true },
+          "responses.blog.tone": { "required": true },
+          "responses.blog.length": { "required": true }
+        },
+        "style_matching": {
+          "enabled": true,
+          "existing_url_provided": true,
+          "expect_audit": true
+        }
+      }
+    },
+    {
+      "test_id": "blog-no-site",
+      "description": "User has no website at all — tests the early-exit gate that redirects to Website Setup Advisor instead of writing a blog post",
+      "inputs": {
+        "responses": {
+          "blog": {
+            "website_status": "No — I don't have a website"
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "Website Setup Advisor"
+        ],
+        "advisory_content": [
+          "need a home before content can be effective",
+          "domain authority",
+          "indexing",
+          "Website Setup Advisor"
+        ]
+      },
+      "output_must_not_contain": [
+        "Variant A",
+        "Variant B",
+        "Variant C",
+        "Keyword Hotlist",
+        "Blog Audit",
+        "meta description",
+        "URL slug",
+        "Competitive Content Landscape"
+      ],
+      "kb_save_check": {
+        "expected_saves": [],
+        "expected_artifacts": [],
+        "expected_business_facts": []
+      },
+      "validation_checks": {
+        "early_exit": true,
+        "reason": "website_status is 'No — I don't have a website' which triggers the advisory-only path per system_prompt gate",
+        "processing_steps_skipped": [
+          "research-and-audit",
+          "write-variants"
+        ]
+      }
+    }
+  ]
+}

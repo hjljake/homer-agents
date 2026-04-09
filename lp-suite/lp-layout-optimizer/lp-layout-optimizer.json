@@ -3,7 +3,7 @@
     "id": "lp-layout-optimizer",
     "name": "Scroll Path Optimizer",
     "version": "1.0.0",
-    "description": "Analyzes landing page structure, visual hierarchy, section ordering, CTA rhythm, and content flow — then provides specific restructuring recommendations. Adapts for traffic type: cold traffic emphasizes trust-building section order, warm traffic emphasizes offer-first layout and friction reduction.",
+    "description": "Analyzes landing page structure, visual hierarchy, section ordering, CTA rhythm, and content flow \u2014 then provides specific restructuring recommendations. Adapts for traffic type: cold traffic emphasizes trust-building section order, warm traffic emphasizes offer-first layout and friction reduction.",
     "category": "analysis",
     "tags": [
       "landing-page",
@@ -64,8 +64,8 @@
           "format": "select",
           "required": true,
           "options": [
-            "Cold — visitors who have never heard of this brand",
-            "Warm — visitors who already know the brand (email list, retargeting, social followers, existing customers)"
+            "Cold \u2014 visitors who have never heard of this brand",
+            "Warm \u2014 visitors who already know the brand (email list, retargeting, social followers, existing customers)"
           ]
         },
         {
@@ -112,7 +112,7 @@
           "responseKey": "lp.referring_message",
           "format": "textarea",
           "required": false,
-          "placeholder": "E.g., 'Your exclusive 30% off — this weekend only', 'You're invited to upgrade to Pro'..."
+          "placeholder": "E.g., 'Your exclusive 30% off \u2014 this weekend only', 'You're invited to upgrade to Pro'..."
         },
         {
           "id": "visitor-relationship",
@@ -139,7 +139,7 @@
         },
         {
           "id": "priority-sections",
-          "question": "Which areas are most important to optimize? (optional — pick 2-3)",
+          "question": "Which areas are most important to optimize? (optional \u2014 pick 2-3)",
           "responseKey": "lp.priority_sections",
           "format": "multiselect",
           "required": false,
@@ -229,12 +229,12 @@
     ]
   },
   "instructions": {
-    "system_prompt": "You are a landing page layout specialist. You analyze structural layout and recommend changes optimized for the visitor's traffic type.\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n## Traffic Type Framework\n\nIf COLD traffic: Layout should follow a trust-building arc. Recommended section order: Hero (high-impact headline + trust anchor) → How It Works (mechanism/process) → Benefits (outcome framing) → Social Proof (compound credibility) → Offer + CTA → FAQ (objection handling) → Final CTA. Pages should be LONGER (cold visitors need more persuasion). Navigation should be REMOVED (every exit point is a leak). Use frameworks: PAS for pain-aware audiences, AIDA for aspiration-driven audiences.\n\nIf WARM traffic: Layout should be offer-first. Recommended section order: Hero (message match + offer headline) → Offer Details (what they get, what it costs) → Comparison (current state vs proposed) → Peer Proof (results from similar users) → FAQ (warm-specific objections) → Final CTA. Pages can be SHORTER (less persuasion needed). Trust-building sections should be lighter. Friction reduction is more important than persuasion. Personalized content blocks should be prominent.\n\nUse the lp-layout-optimization skill's frameworks with traffic-type adaptations.",
+    "system_prompt": "You are a landing page layout specialist. You analyze structural layout and recommend changes optimized for the visitor's traffic type.\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n## Traffic Type Framework\n\nIf COLD traffic: Layout should follow a trust-building arc. Recommended section order: Hero (high-impact headline + trust anchor) \u2192 How It Works (mechanism/process) \u2192 Benefits (outcome framing) \u2192 Social Proof (compound credibility) \u2192 Offer + CTA \u2192 FAQ (objection handling) \u2192 Final CTA. Pages should be LONGER (cold visitors need more persuasion). Navigation should be REMOVED (every exit point is a leak). Use frameworks: PAS for pain-aware audiences, AIDA for aspiration-driven audiences.\n\nIf WARM traffic: Layout should be offer-first. Recommended section order: Hero (message match + offer headline) \u2192 Offer Details (what they get, what it costs) \u2192 Comparison (current state vs proposed) \u2192 Peer Proof (results from similar users) \u2192 FAQ (warm-specific objections) \u2192 Final CTA. Pages can be SHORTER (less persuasion needed). Trust-building sections should be lighter. Friction reduction is more important than persuasion. Personalized content blocks should be prominent.\n\nUse the lp-layout-optimization skill's frameworks with traffic-type adaptations.",
     "processing_steps": [
       {
         "id": "gather-scorecard-or-crawl",
         "description": "Check for prior scorecard analysis or fall back to lightweight page crawl",
-        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nUser's score corrections: {{responses.lp.score_corrections}}\nUser's priority sections: {{responses.lp.priority_sections}}\nUser's constraints: {{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Check for prior scorecard analysis.** Look for `type: lp-scorecard-analysis` matching the URL and traffic type.\n\n2. **If found and fresh (< 30 days):** Extract all scorecard data. Apply user corrections.\n\n3. **If found but stale (> 30 days):** Extract same data, prepend staleness warning.\n\n4. **If NOT found:** Crawl the page with search_web. Call manage_business_fact. Prepend recommendation to run the LP Scorecard Analyzer first."
+        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nUser's score corrections: {{responses.lp.score_corrections}}\nUser's priority sections: {{responses.lp.priority_sections}}\nUser's constraints: {{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Check for prior scorecard analysis.** Look for `type: lp-scorecard-analysis` matching the URL and traffic type.\n\n\\n\\n**KB Result Verification:** When you find a prior analysis, check the `page_url` in its YAML header against the current target URL. If the URLs do not match, discard that result and proceed as if no prior analysis exists. Do not apply findings from one page to a different page.\\n\\n2. **If found and fresh (< 30 days):** Extract all scorecard data. Apply user corrections.\n\n3. **If found but stale (> 30 days):** Extract same data, prepend staleness warning.\n\n4. **If NOT found:** Crawl the page with search_web. Call manage_business_fact. Prepend recommendation to run the LP Scorecard Analyzer first."
       },
       {
         "id": "audit-layout",
@@ -242,7 +242,55 @@
         "depends_on": [
           "gather-scorecard-or-crawl"
         ],
-        "prompt": "## Scorecard Results\n{{prior_steps.gather-scorecard-or-crawl.content}}\n\n## Page URL\n{{responses.lp.url}}\n\n## Traffic Type\n{{responses.lp.traffic_type}}\n\n## Page Goal\n{{responses.lp.goal}}\n\n## Traffic Source\n{{responses.lp.traffic_source}}\n\n## Referring Message\n{{responses.lp.referring_message}}\n\n## Visitor Relationship\n{{responses.lp.visitor_relationship}}\n\n## User Corrections\n{{responses.lp.score_corrections}}\n\n## Priority Sections\n{{responses.lp.priority_sections}}\n\n## Constraints\n{{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Map current page structure.** List every section in order.\n\n2. **Evaluate against traffic-appropriate flow.** How does the current page compare to the recommended section order for the traffic type? Are there unnecessary sections? Missing critical sections?\n\n3. **Identify friction points.** For cold: how many trust signals appear before the first CTA? Are there competing exit points? For warm: how many steps from CTA click to completion? Form fields that could be pre-filled? Unnecessary re-explanation of the brand?\n\n4. **Run the squint test.** Describe visual hierarchy — what stands out most?\n\n5. **Audit above-the-fold.** For cold: is the hero compelling enough to prevent bounce? For warm: is the offer visible above the fold?\n\n6. **Map CTA rhythm.** List every CTA, position, and copy.\n\n7. **Evaluate mobile layout** — critical for both traffic types but especially warm (email/SMS traffic is 70%+ mobile).\n\n8. **For warm traffic: check channel consistency.** Does the page's visual style match the referring channel?\n\n9. **Score using the lp-layout-optimization skill's 8-dimension rubric** (each 0-2, total /16).\n\n10. **Generate recommendations.** For each dimension scoring 0 or 1: issue, recommendation, wireframe-style proposed layout, priority, effort estimate.\n\n11. **Recommend optimal section order** for the traffic type.\n\n## Output\n\nLabel your output **layout_recommendations** including:\n- Current section map\n- Current layout score (X/16)\n- Traffic-appropriate flow assessment\n- Friction point audit\n- Above-fold audit\n- CTA rhythm map\n- Mobile layout assessment\n- Channel consistency assessment (warm only)\n- 8-dimension scores with recommendations\n- Proposed optimal section order\n- Projected scorecard improvements\n\nSave to KB with title: 'LP Layout Recommendations: [business name] — {{responses.lp.traffic_type}} — [date]'.\n\nYAML header:\ntype: lp-layout-recommendations\nlead_type: {{responses.lp.traffic_type}}\nresearch_date: [today's date]\npage_url: [URL]\nlayout_score: [X/16]\nsource_scorecard_date: [date of scorecard used, or \"none\"]"
+        "prompt": "## Scorecard Results\n{{prior_steps.gather-scorecard-or-crawl.content}}\n\n## Page URL\n{{responses.lp.url}}\n\n## Traffic Type\n{{responses.lp.traffic_type}}\n\n## Page Goal\n{{responses.lp.goal}}\n\n## Traffic Source\n{{responses.lp.traffic_source}}\n\n## Referring Message\n{{responses.lp.referring_message}}\n\n## Visitor Relationship\n{{responses.lp.visitor_relationship}}\n\n## User Corrections\n{{responses.lp.score_corrections}}\n\n## Priority Sections\n{{responses.lp.priority_sections}}\n\n## Constraints\n{{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Map current page structure.** List every section in order.\n\n2. **Evaluate against traffic-appropriate flow.** How does the current page compare to the recommended section order for the traffic type? Are there unnecessary sections? Missing critical sections?\n\n3. **Identify friction points.** For cold: how many trust signals appear before the first CTA? Are there competing exit points? For warm: how many steps from CTA click to completion? Form fields that could be pre-filled? Unnecessary re-explanation of the brand?\n\n4. **Run the squint test.** Describe visual hierarchy \u2014 what stands out most?\n\n5. **Audit above-the-fold.** For cold: is the hero compelling enough to prevent bounce? For warm: is the offer visible above the fold?\n\n6. **Map CTA rhythm.** List every CTA, position, and copy.\n\n7. **Evaluate mobile layout** \u2014 critical for both traffic types but especially warm (email/SMS traffic is 70%+ mobile).\n\n8. **For warm traffic: check channel consistency.** Does the page's visual style match the referring channel?\n\n9. **Score using the lp-layout-optimization skill's 8-dimension rubric** (each 0-2, total /16).\n\n10. **Generate recommendations.** For each dimension scoring 0 or 1: issue, recommendation, wireframe-style proposed layout, priority, effort estimate.\n\n11. **Recommend optimal section order** for the traffic type.\n\n## Output\n\nLabel your output **layout_recommendations** including:\n- Current section map\n- Current layout score (X/16)\n- Traffic-appropriate flow assessment\n- Friction point audit\n- Above-fold audit\n- CTA rhythm map\n- Mobile layout assessment\n- Channel consistency assessment (warm only)\n- 8-dimension scores with recommendations\n- Proposed optimal section order\n- Projected scorecard improvements\n\nSave to KB with title: 'LP Layout Recommendations: [business name] \u2014 {{responses.lp.traffic_type}} \u2014 [date]'.\n\nYAML header:\ntype: lp-layout-recommendations\nlead_type: {{responses.lp.traffic_type}}\nresearch_date: [today's date]\npage_url: [URL]\nlayout_score: [X/16]\nsource_scorecard_date: [date of scorecard used, or \"none\"]"
+      }
+    ]
+  },
+  "validation": {
+    "input_rules": [
+      {
+        "field": "responses.lp.url",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.traffic_type",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.traffic_source",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.goal",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    ],
+    "output_rules": [
+      {
+        "field": "content",
+        "rules": {
+          "required": true,
+          "min_length": 1500
+        }
+      }
+    ],
+    "quality_checks": [
+      {
+        "id": "eight-dimension-rubric",
+        "description": "Verify all 8 layout dimensions are scored with a section map",
+        "prompt": "Verify the output scores all 8 layout dimensions from the rubric with explicit numeric ratings (each 0-2, total out of 16) and includes a current section map of the page. Return PASS if all 8 dimensions are scored and section map is present, FAIL listing what is missing."
       }
     ]
   }

@@ -1,0 +1,153 @@
+{
+  "agent_id": "lp-ab-variant-builder",
+  "test_cases": [
+    {
+      "test_id": "ab-zero-upstream",
+      "description": "A/B variant builder with ZERO upstream outputs in KB -- tests crawl-only degradation mode (should advise running scorecard first)",
+      "inputs": {
+        "lp.url": "https://example-startup.com/early-access",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+        "lp.goal": "Sign up for a free trial"
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["variant_a", "variant_b", "degradation_mode"],
+        "degradation_mode": "crawl-only",
+        "advisory_to_run_scorecard": true,
+        "variant_a_type": "incremental",
+        "variant_b_type": "structural"
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Optimization Variant [AB]:.*Cold.*",
+        "yaml_type": "landing-page-ab-variant",
+        "yaml_fields_present": ["variant", "current_score", "estimated_new_score", "target_sections", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "ab-three-upstream",
+      "description": "A/B variant builder with 3 upstream outputs (scorecard + headline + ICP) -- tests partial synthesis with lightweight fills for gaps",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output"
+          },
+          {
+            "yaml_type": "lp-headline-recommendations",
+            "title_pattern": "LP Headline Recommendations:.*Cold.*",
+            "description": "Headline optimizer output"
+          },
+          {
+            "yaml_type": "lp-icp-recommendations",
+            "title_pattern": "LP ICP Recommendations:.*Cold.*",
+            "description": "ICP optimizer output"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["variant_a", "variant_b", "degradation_mode", "implementation_checklist", "ab_test_setup"],
+        "degradation_mode": "partial",
+        "upstream_sources_found": 3,
+        "variant_a_type": "incremental",
+        "variant_a_projected_lift": "10-30%",
+        "variant_b_type": "structural",
+        "variant_b_projected_lift": "20-60%",
+        "lightweight_fills_for_missing": ["layout", "cta", "social_proof", "mobile", "funnel", "copy_draft"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Optimization Variant [AB]:.*Cold.*",
+        "yaml_type": "landing-page-ab-variant",
+        "yaml_fields_present": ["variant", "current_score", "estimated_new_score", "target_sections", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "ab-seven-upstream",
+      "description": "A/B variant builder with ALL optimizer outputs in KB -- tests full synthesis mode with complete data",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output"
+          },
+          {
+            "yaml_type": "lp-headline-recommendations",
+            "title_pattern": "LP Headline Recommendations:.*Cold.*",
+            "description": "Headline optimizer output"
+          },
+          {
+            "yaml_type": "lp-icp-recommendations",
+            "title_pattern": "LP ICP Recommendations:.*Cold.*",
+            "description": "ICP optimizer output"
+          },
+          {
+            "yaml_type": "lp-layout-recommendations",
+            "title_pattern": "LP Layout Recommendations:.*Cold.*",
+            "description": "Layout optimizer output"
+          },
+          {
+            "yaml_type": "lp-cta-recommendations",
+            "title_pattern": "LP CTA Recommendations:.*Cold.*Lead.*",
+            "description": "CTA optimizer output"
+          },
+          {
+            "yaml_type": "lp-social-proof-recommendations",
+            "title_pattern": "LP Social Proof Recommendations:.*Cold.*Lead.*",
+            "description": "Social proof optimizer output"
+          },
+          {
+            "yaml_type": "lp-mobile-recommendations",
+            "title_pattern": "LP Mobile Audit:.*Cold.*",
+            "description": "Mobile auditor output"
+          },
+          {
+            "yaml_type": "funnel-continuity-audit",
+            "title_pattern": "Funnel Audit:.*Paid search.*",
+            "description": "Funnel auditor output"
+          },
+          {
+            "yaml_type": "lp-copy-draft",
+            "title_pattern": "LP Copy Draft:.*Cold.*",
+            "description": "Copy writer output"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["variant_a", "variant_b", "implementation_checklist", "ab_test_setup"],
+        "degradation_mode": "full",
+        "upstream_sources_found": 9,
+        "variant_a_type": "incremental",
+        "variant_a_projected_lift": "10-30%",
+        "variant_a_section_changes": true,
+        "variant_b_type": "structural",
+        "variant_b_projected_lift": "20-60%",
+        "variant_b_section_changes": true,
+        "saves_two_kb_documents": true
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Optimization Variant [AB]:.*Cold.*",
+        "yaml_type": "landing-page-ab-variant",
+        "yaml_fields_present": ["variant", "current_score", "estimated_new_score", "target_sections", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

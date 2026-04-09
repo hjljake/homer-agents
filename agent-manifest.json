@@ -1,0 +1,193 @@
+{
+  "_description": "Agent prerequisites and resource bounds for Simon's review. To be merged into agent definitions once the AgentDefinition schema is extended to support these fields.",
+  "_usage": "Eduardo: extend agent-definition.schema.json with 'prerequisites' and 'resource_bounds' inside metadata, then migrate these values into each agent's JSON.",
+  "agents": {
+    "lp-scorecard-analyzer": {
+      "prerequisites": null,
+      "resource_bounds": {
+        "expected_token_range": [4000, 12000],
+        "expected_tool_calls": [3, 10],
+        "expected_duration_seconds": [60, 180],
+        "max_web_searches": 3
+      }
+    },
+    "lp-headline-optimizer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [],
+        "skip_message": "Works standalone, but results improve with a Scorecard analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [2000, 8000],
+        "expected_tool_calls": [2, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "lp-icp-optimizer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [],
+        "skip_message": "Works standalone, but results improve with a Scorecard analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [3000, 10000],
+        "expected_tool_calls": [3, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "lp-layout-optimizer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [],
+        "skip_message": "Works standalone, but results improve with a Scorecard analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [3000, 10000],
+        "expected_tool_calls": [2, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "lp-cta-optimizer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [],
+        "skip_message": "Works standalone, but results improve with a Scorecard analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [3000, 10000],
+        "expected_tool_calls": [2, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 5
+      }
+    },
+    "lp-social-proof-optimizer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [],
+        "skip_message": "Works standalone, but results improve with a Scorecard analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [3000, 10000],
+        "expected_tool_calls": [2, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 5
+      }
+    },
+    "lp-mobile-experience-auditor": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": ["lp-layout-optimizer"],
+        "skip_message": "Works standalone, but results improve with a Scorecard and Layout analysis."
+      },
+      "resource_bounds": {
+        "expected_token_range": [4000, 12000],
+        "expected_tool_calls": [2, 8],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "lp-copy-full-page-writer": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [
+          "lp-headline-optimizer",
+          "lp-icp-optimizer",
+          "lp-layout-optimizer",
+          "lp-cta-optimizer",
+          "lp-social-proof-optimizer",
+          "lp-funnel-auditor"
+        ],
+        "skip_message": "Works standalone. The more optimizer results available, the better the output."
+      },
+      "resource_bounds": {
+        "expected_token_range": [6000, 25000],
+        "expected_tool_calls": [3, 10],
+        "expected_duration_seconds": [60, 300],
+        "max_web_searches": 3
+      }
+    },
+    "lp-funnel-auditor": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [
+          "lp-headline-optimizer",
+          "lp-icp-optimizer",
+          "lp-layout-optimizer",
+          "lp-cta-optimizer",
+          "lp-social-proof-optimizer",
+          "lp-mobile-experience-auditor",
+          "lp-copy-full-page-writer",
+          "lp-ab-variant-builder"
+        ],
+        "skip_message": "Works standalone for a full-funnel audit. Prior LP analyses enrich the landing page stage."
+      },
+      "resource_bounds": {
+        "expected_token_range": [6000, 20000],
+        "expected_tool_calls": [4, 12],
+        "expected_duration_seconds": [60, 300],
+        "max_web_searches": 5
+      }
+    },
+    "lp-ab-variant-builder": {
+      "prerequisites": {
+        "recommended": ["lp-scorecard-analyzer"],
+        "enhancers": [
+          "lp-headline-optimizer",
+          "lp-icp-optimizer",
+          "lp-layout-optimizer",
+          "lp-cta-optimizer",
+          "lp-social-proof-optimizer",
+          "lp-mobile-experience-auditor",
+          "lp-funnel-auditor",
+          "lp-copy-full-page-writer"
+        ],
+        "skip_message": "Produces the strongest output when multiple optimizer results are available."
+      },
+      "resource_bounds": {
+        "expected_token_range": [5000, 18000],
+        "expected_tool_calls": [3, 10],
+        "expected_duration_seconds": [60, 240],
+        "max_web_searches": 3
+      }
+    },
+    "cta-specialist": {
+      "prerequisites": null,
+      "resource_bounds": {
+        "expected_token_range": [2000, 8000],
+        "expected_tool_calls": [2, 6],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "upsell-advisor": {
+      "prerequisites": null,
+      "resource_bounds": {
+        "expected_token_range": [2000, 8000],
+        "expected_tool_calls": [2, 6],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    },
+    "blog-post-writer": {
+      "prerequisites": null,
+      "resource_bounds": {
+        "expected_token_range": [4000, 15000],
+        "expected_tool_calls": [3, 8],
+        "expected_duration_seconds": [60, 240],
+        "max_web_searches": 5
+      }
+    },
+    "website-setup-advisor": {
+      "prerequisites": null,
+      "resource_bounds": {
+        "expected_token_range": [3000, 10000],
+        "expected_tool_calls": [3, 6],
+        "expected_duration_seconds": [30, 120],
+        "max_web_searches": 3
+      }
+    }
+  }
+}

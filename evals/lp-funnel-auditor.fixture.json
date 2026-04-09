@@ -1,0 +1,104 @@
+{
+  "agent_id": "lp-funnel-auditor",
+  "test_cases": [
+    {
+      "test_id": "funnel-full",
+      "description": "Full funnel audit with all upstream LP optimizer data in KB -- should incorporate into Stage 3 (LP) of 5-stage funnel",
+      "inputs": {
+        "funnel.lp_url": "https://example-saas.com/demo",
+        "funnel.type": "Paid search to demo booking",
+        "funnel.ad_copy": "Stop losing leads. Our CRM closes 3x more deals. Book a free demo today.",
+        "funnel.conversion_steps": "1. Click ad 2. Land on /demo 3. Fill form (name, email, company) 4. Confirm booking 5. Calendar invite sent",
+        "funnel.post_conversion": "Email sequence: confirmation, reminder 24h, reminder 1h. No SMS."
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output"
+          },
+          {
+            "yaml_type": "lp-headline-recommendations",
+            "title_pattern": "LP Headline Recommendations:.*Cold.*",
+            "description": "Headline optimizer output"
+          },
+          {
+            "yaml_type": "lp-icp-recommendations",
+            "title_pattern": "LP ICP Recommendations:.*Cold.*",
+            "description": "ICP optimizer output"
+          },
+          {
+            "yaml_type": "lp-layout-recommendations",
+            "title_pattern": "LP Layout Recommendations:.*Cold.*",
+            "description": "Layout optimizer output"
+          },
+          {
+            "yaml_type": "lp-cta-recommendations",
+            "title_pattern": "LP CTA Recommendations:.*Cold.*Lead.*",
+            "description": "CTA optimizer output"
+          },
+          {
+            "yaml_type": "lp-social-proof-recommendations",
+            "title_pattern": "LP Social Proof Recommendations:.*Cold.*Lead.*",
+            "description": "Social proof optimizer output"
+          },
+          {
+            "yaml_type": "lp-mobile-recommendations",
+            "title_pattern": "LP Mobile Audit:.*Cold.*",
+            "description": "Mobile auditor output"
+          },
+          {
+            "yaml_type": "lp-copy-draft",
+            "title_pattern": "LP Copy Draft:.*Cold.*",
+            "description": "Copy writer output"
+          },
+          {
+            "yaml_type": "landing-page-ab-variant",
+            "title_pattern": "LP Optimization Variant.*Cold.*",
+            "description": "A/B variant builder output"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["funnel_map", "promise_chain", "funnel_rubric", "stage_by_stage_fixes", "funnel_score", "leakiest_handoff"],
+        "funnel_score_range": [0, 20],
+        "rubric_dimensions": 10,
+        "funnel_stages": ["awareness", "click", "landing_page", "conversion", "post_conversion"],
+        "incorporates_lp_optimizer_data": true
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "Funnel Audit:.*Paid search.*",
+        "yaml_type": "funnel-continuity-audit",
+        "yaml_fields_present": ["funnel_score", "leakiest_handoff", "primary_channel", "conversion_goal", "lead_type", "research_date", "landing_page_url"]
+      }
+    },
+    {
+      "test_id": "funnel-standalone",
+      "description": "Minimal standalone funnel audit with no prior LP optimizer data -- tests standalone 5-stage assessment",
+      "inputs": {
+        "funnel.lp_url": "https://example-fitness.com/30-day-challenge",
+        "funnel.type": "Paid social to free trial signup",
+        "funnel.ad_copy": "Transform your body in 30 days. Join 50,000+ members. Start free.",
+        "funnel.conversion_steps": "1. Click ad 2. Land on /30-day-challenge 3. Enter email 4. Create account",
+        "funnel.post_conversion": "Welcome email with login link. Day 1 workout email."
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["funnel_map", "promise_chain", "funnel_rubric", "stage_by_stage_fixes", "funnel_score", "leakiest_handoff"],
+        "funnel_score_range": [0, 20],
+        "rubric_dimensions": 10,
+        "funnel_stages": ["awareness", "click", "landing_page", "conversion", "post_conversion"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "Funnel Audit:.*Paid social.*",
+        "yaml_type": "funnel-continuity-audit",
+        "yaml_fields_present": ["funnel_score", "leakiest_handoff", "primary_channel", "conversion_goal", "lead_type", "research_date", "landing_page_url"]
+      }
+    }
+  ]
+}

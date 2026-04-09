@@ -1,15 +1,19 @@
 {
   "_comment": "Three agent definitions used by the conversion-cta-specialist CDW workflow. Each corresponds to an 'agent' type step in the workflow.",
-
   "agents": [
     {
       "metadata": {
         "id": "cta-website-analyzer",
         "name": "CTA Website Analyzer",
         "version": "1.0.0",
-        "description": "Crawls user's website to catalog all CTAs — copy, placement, style, visibility, and device behavior. Also pulls business context from KB.",
+        "description": "Crawls user's website to catalog all CTAs \u2014 copy, placement, style, visibility, and device behavior. Also pulls business context from KB.",
         "category": "analysis",
-        "tags": ["cta", "conversion", "website", "audit"],
+        "tags": [
+          "cta",
+          "conversion",
+          "website",
+          "audit"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -18,18 +22,15 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "cta-optimization"
       ],
-
       "tools": [
         "search_web",
         "retrieve_reference_content",
         "manage_business_fact",
         "add_file_to_kb"
       ],
-
       "question_sets": [
         {
           "type": "embedded",
@@ -46,7 +47,6 @@
           ]
         }
       ],
-
       "references": {
         "kb_items": [],
         "searches": [
@@ -54,29 +54,42 @@
             "id": "business-profile",
             "strategy": "semantic",
             "query_template": "business profile products services industry",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 5
           },
           {
             "id": "strategist-report",
             "strategy": "semantic",
             "query_template": "business strategy report analysis",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 2
           },
           {
             "id": "customer-profile",
             "strategy": "semantic",
             "query_template": "customer profile ideal customer persona",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 3
           }
         ]
       },
-
       "instructions": {
-        "system_prompt": "You are a CTA audit specialist. Your job is to crawl the user's website and build a complete inventory of every call-to-action, along with business context from the knowledge base.\n\nThe website URL is REQUIRED — it will be provided via the question set.\n\nUse the cta-optimization skill's CTA Audit Checklist as your evaluation framework.\n\n## What to Do\n\n1. Search the KB for existing business data (products, services, industry, customer profile, Strategist report)\n2. Use search_web to analyze the user's website — focus on:\n   - Homepage\n   - Main product/service pages\n   - Pricing page (if exists)\n   - Contact/demo page (if exists)\n   - Any landing pages linked from the main nav\n3. For EACH page, catalog every CTA you find\n\n## What to Record for Each CTA\n\n- **Page:** which page it's on\n- **Exact copy:** the button/link text, word for word\n- **Type:** primary / secondary / sticky / inline / exit-intent\n- **Placement:** above fold / below fold / sidebar / header / footer / inline / sticky\n- **Visual description:** color, approximate size, prominence\n- **Supporting text:** any microcopy near the CTA (\"No credit card required\", etc.)\n- **Issues noted:** per the CTA Audit Checklist (ghost CTAs, competing CTAs, etc.)\n\n## Output Structure\n\nYour output must have THREE clearly labeled sections:\n\n1. **website_url** — the analyzed URL\n2. **business_context** — industry, products/services, target customer, business model, and any relevant data from KB\n3. **cta_inventory** — complete CTA catalog organized by page, with the fields above for each CTA, plus a summary of issues found\n\nBe specific. Quote exact copy. Note exact placement. If a CTA is hard to find, say so — ghost CTAs are a key finding.",
-
+        "system_prompt": "You are a CTA audit specialist. Your job is to crawl the user's website and build a complete inventory of every call-to-action, along with business context from the knowledge base.\n\nThe website URL is REQUIRED \u2014 it will be provided via the question set.\n\nUse the cta-optimization skill's CTA Audit Checklist as your evaluation framework.\n\n## What to Do\n\n1. Search the KB for existing business data (products, services, industry, customer profile, Strategist report)\n2. Use search_web to analyze the user's website \u2014 focus on:\n   - Homepage\n   - Main product/service pages\n   - Pricing page (if exists)\n   - Contact/demo page (if exists)\n   - Any landing pages linked from the main nav\n3. For EACH page, catalog every CTA you find\n\n## What to Record for Each CTA\n\n- **Page:** which page it's on\n- **Exact copy:** the button/link text, word for word\n- **Type:** primary / secondary / sticky / inline / exit-intent\n- **Placement:** above fold / below fold / sidebar / header / footer / inline / sticky\n- **Visual description:** color, approximate size, prominence\n- **Supporting text:** any microcopy near the CTA (\"No credit card required\", etc.)\n- **Issues noted:** per the CTA Audit Checklist (ghost CTAs, competing CTAs, etc.)\n\n## Output Structure\n\nYour output must have THREE clearly labeled sections:\n\n1. **website_url** \u2014 the analyzed URL\n2. **business_context** \u2014 industry, products/services, target customer, business model, and any relevant data from KB\n3. **cta_inventory** \u2014 complete CTA catalog organized by page, with the fields above for each CTA, plus a summary of issues found\n\nBe specific. Quote exact copy. Note exact placement. If a CTA is hard to find, say so \u2014 ghost CTAs are a key finding.",
         "processing_steps": [
           {
             "id": "gather-business-context",
@@ -86,21 +99,47 @@
           {
             "id": "crawl-and-catalog",
             "description": "Analyze the website and build a complete CTA inventory",
-            "prompt": "Website URL: {{responses.website.url}}\n\nUsing search_web, analyze the user's website systematically:\n\n1. Start with the homepage\n2. Follow main navigation links to key pages (products, services, pricing, contact, about)\n3. Check for landing pages or special offer pages\n\nFor EACH page you can access, catalog every CTA using the framework from gather-business-context.\n\nApply the CTA Audit Checklist from the cta-optimization skill to each CTA found.\n\nOrganize your findings as:\n\n### Page: [Page Name] ([URL])\n\n#### CTA 1: \"[Exact Button Text]\"\n- Type: [primary/secondary/sticky/inline]\n- Placement: [above fold/below fold/etc.]\n- Visual: [color, size, prominence]\n- Supporting text: [microcopy if any]\n- Checklist score: [pass/fail on key checklist items]\n- Issues: [specific problems identified]\n\n(repeat for each CTA on each page)\n\n### Summary\n- Total CTAs found: X across Y pages\n- Primary issues: [top 3 problems]\n- Ghost CTAs: [any hidden or invisible CTAs]\n- Missing CTAs: [pages that should have CTAs but don't]\n- Competing CTAs: [places where multiple CTAs fight for attention]\n\nSave the full analysis to KB using add_file_to_kb with title: 'CTA Audit: [business name] — [date]'",
-            "depends_on": ["gather-business-context"]
+            "prompt": "Website URL: {{responses.website.url}}\n\nUsing search_web, analyze the user's website systematically:\n\n1. Start with the homepage\n2. Follow main navigation links to key pages (products, services, pricing, contact, about)\n3. Check for landing pages or special offer pages\n\nFor EACH page you can access, catalog every CTA using the framework from gather-business-context.\n\nApply the CTA Audit Checklist from the cta-optimization skill to each CTA found.\n\nOrganize your findings as:\n\n### Page: [Page Name] ([URL])\n\n#### CTA 1: \"[Exact Button Text]\"\n- Type: [primary/secondary/sticky/inline]\n- Placement: [above fold/below fold/etc.]\n- Visual: [color, size, prominence]\n- Supporting text: [microcopy if any]\n- Checklist score: [pass/fail on key checklist items]\n- Issues: [specific problems identified]\n\n(repeat for each CTA on each page)\n\n### Summary\n- Total CTAs found: X across Y pages\n- Primary issues: [top 3 problems]\n- Ghost CTAs: [any hidden or invisible CTAs]\n- Missing CTAs: [pages that should have CTAs but don't]\n- Competing CTAs: [places where multiple CTAs fight for attention]\n\nSave the full analysis to KB using add_file_to_kb with title: 'CTA Audit: [business name] \u2014 [date]'",
+            "depends_on": [
+              "gather-business-context"
+            ]
+          }
+        ]
+      },
+      "validation": {
+        "input_rules": [
+          {
+            "field": "responses.website.url",
+            "rules": {
+              "required": true,
+              "type": "string"
+            }
+          }
+        ],
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 1000
+            }
           }
         ]
       }
     },
-
     {
       "metadata": {
         "id": "cta-industry-researcher",
         "name": "CTA Industry Researcher",
         "version": "1.0.0",
-        "description": "Researches CTA best practices specific to the user's industry — competitor examples, conversion benchmarks, copy patterns, and platform-specific implementation.",
+        "description": "Researches CTA best practices specific to the user's industry \u2014 competitor examples, conversion benchmarks, copy patterns, and platform-specific implementation.",
         "category": "analysis",
-        "tags": ["cta", "conversion", "research", "industry"],
+        "tags": [
+          "cta",
+          "conversion",
+          "research",
+          "industry"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -109,17 +148,14 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "cta-optimization"
       ],
-
       "tools": [
         "search_web",
         "add_file_to_kb",
         "manage_business_fact"
       ],
-
       "references": {
         "kb_items": [],
         "searches": [
@@ -127,25 +163,38 @@
             "id": "prior-cta-research",
             "strategy": "semantic",
             "query_template": "CTA conversion optimization best practices research",
-            "filters": { "content_type": ["document"], "min_similarity": 0.7 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.7
+            },
             "limit": 2
           }
         ]
       },
-
       "instructions": {
-        "system_prompt": "You are a conversion rate optimization researcher specializing in CTAs. Your job is to find industry-specific CTA best practices, competitor examples, and conversion benchmarks for the user's business.\n\nYou will receive business context, the CTA inventory, user corrections, their conversion goal, and any known issues via input_mapping.\n\nIMPORTANT — Freshness: Check KB for existing CTA research. If recent (<30 days based on research_date), reuse it. If stale or missing, conduct fresh research.\n\nFocus on SPECIFIC, ACTIONABLE findings — not generic \"make your button bigger\" advice. Find real companies, real numbers, real examples.",
-
+        "system_prompt": "You are a conversion rate optimization researcher specializing in CTAs. Your job is to find industry-specific CTA best practices, competitor examples, and conversion benchmarks for the user's business.\n\nYou will receive business context, the CTA inventory, user corrections, their conversion goal, and any known issues via input_mapping.\n\nIMPORTANT \u2014 Freshness: Check KB for existing CTA research. If recent (<30 days based on research_date), reuse it. If stale or missing, conduct fresh research.\n\nFocus on SPECIFIC, ACTIONABLE findings \u2014 not generic \"make your button bigger\" advice. Find real companies, real numbers, real examples.",
         "processing_steps": [
           {
             "id": "research-industry-ctas",
             "description": "Research CTA best practices for the user's specific industry and platform",
-            "prompt": "Business context: {{input.business_context}}\nCTA inventory: {{input.cta_inventory}}\nUser corrections: {{input.user_corrections}}\nBusiness corrections: {{input.business_corrections}}\nConversion goal: {{input.conversion_goal}}\nKnown issues: {{input.known_issues}}\nWebsite URL: {{input.website_url}}\n\nUsing search_web, research the following:\n\n1. **Industry CTA benchmarks:** What are typical conversion rates for CTAs in this industry? What copy patterns perform best? Search for case studies with actual numbers.\n\n2. **Competitor CTA analysis:** How do the top 3-5 competitors in this space structure their CTAs? What copy do they use? Where are they placed? Look at their actual websites.\n\n3. **Platform-specific guidance:** Based on what website platform they're using, what are the best ways to implement CTA changes? What tools/apps/plugins help?\n\n4. **Copy that converts in this vertical:** Find specific CTA copy examples that have been tested and proven in this industry. A/B test results are gold.\n\n5. **Common mistakes in this industry:** What CTA anti-patterns are especially prevalent in this vertical?\n\n## Based on Their Specific Issues\n\nTheir conversion goal is: {{input.conversion_goal}}\nTheir known issues are: {{input.known_issues}}\n\nResearch solutions specifically for these problems. Don't just give generic advice — find examples of businesses that solved similar issues.\n\n## Output Format\n\n### Industry CTA Benchmarks\n- Average conversion rate for [industry]: X%\n- Top performers: Y%\n- Key differentiators between average and top performers\n\n### Competitor Analysis\n- Competitor A: [CTA approach, copy, placement, what works]\n- Competitor B: ...\n- Competitor C: ...\n\n### Proven CTA Copy for This Industry\n- Pattern 1: \"[copy]\" — [where used, results if known]\n- Pattern 2: ...\n- Pattern 3: ...\n\n### Platform-Specific Implementation\n- Recommended tools/plugins for their platform\n- Implementation approaches (no-code vs code)\n- Testing tools available on this platform\n\n### Key Insights for Their Specific Situation\n- Top 3 findings that should directly inform our strategy recommendations\n- What their competitors do that they don't\n- Quick wins based on industry data\n\nSave findings to KB using add_file_to_kb with title: 'CTA Best Practices: [industry] — [date]'. Include a research_date YAML header."
+            "prompt": "Business context: {{input.business_context}}\nCTA inventory: {{input.cta_inventory}}\nUser corrections: {{input.user_corrections}}\nBusiness corrections: {{input.business_corrections}}\nConversion goal: {{input.conversion_goal}}\nKnown issues: {{input.known_issues}}\nWebsite URL: {{input.website_url}}\n\nUsing search_web, research the following:\n\n1. **Industry CTA benchmarks:** What are typical conversion rates for CTAs in this industry? What copy patterns perform best? Search for case studies with actual numbers.\n\n2. **Competitor CTA analysis:** How do the top 3-5 competitors in this space structure their CTAs? What copy do they use? Where are they placed? Look at their actual websites.\n\n3. **Platform-specific guidance:** Based on what website platform they're using, what are the best ways to implement CTA changes? What tools/apps/plugins help?\n\n4. **Copy that converts in this vertical:** Find specific CTA copy examples that have been tested and proven in this industry. A/B test results are gold.\n\n5. **Common mistakes in this industry:** What CTA anti-patterns are especially prevalent in this vertical?\n\n## Based on Their Specific Issues\n\nTheir conversion goal is: {{input.conversion_goal}}\nTheir known issues are: {{input.known_issues}}\n\nResearch solutions specifically for these problems. Don't just give generic advice \u2014 find examples of businesses that solved similar issues.\n\n## Output Format\n\n### Industry CTA Benchmarks\n- Average conversion rate for [industry]: X%\n- Top performers: Y%\n- Key differentiators between average and top performers\n\n### Competitor Analysis\n- Competitor A: [CTA approach, copy, placement, what works]\n- Competitor B: ...\n- Competitor C: ...\n\n### Proven CTA Copy for This Industry\n- Pattern 1: \"[copy]\" \u2014 [where used, results if known]\n- Pattern 2: ...\n- Pattern 3: ...\n\n### Platform-Specific Implementation\n- Recommended tools/plugins for their platform\n- Implementation approaches (no-code vs code)\n- Testing tools available on this platform\n\n### Key Insights for Their Specific Situation\n- Top 3 findings that should directly inform our strategy recommendations\n- What their competitors do that they don't\n- Quick wins based on industry data\n\nSave findings to KB using add_file_to_kb with title: 'CTA Best Practices: [industry] \u2014 [date]'. Include a research_date YAML header."
+          }
+        ]
+      },
+      "validation": {
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 500
+            }
           }
         ]
       }
     },
-
     {
       "metadata": {
         "id": "cta-implementation-planner",
@@ -153,7 +202,12 @@
         "version": "1.0.0",
         "description": "Takes the user's chosen CTA strategy and builds a detailed, non-technical implementation plan with exact copy, visual descriptions, platform-specific steps, and A/B testing plan.",
         "category": "planning",
-        "tags": ["cta", "conversion", "implementation", "planning"],
+        "tags": [
+          "cta",
+          "conversion",
+          "implementation",
+          "planning"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -162,27 +216,34 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "cta-optimization",
         "copywriting",
         "marketing-compliance"
       ],
-
       "tools": [
         "add_file_to_kb",
         "create_document_artifact",
         "manage_business_fact"
       ],
-
       "instructions": {
-        "system_prompt": "You are a CTA implementation specialist. The user has chosen one of three CTA optimization strategies. Your job is to turn that into a step-by-step plan that a NON-TECHNICAL person can follow.\n\nThis means:\n- No code unless absolutely necessary (and if so, provide it ready to copy-paste with exact instructions on where to put it)\n- Use platform-specific terminology they'd see in their admin panel (e.g., 'Go to Online Store → Themes → Customize' for Shopify)\n- Include exact copy — don't say 'write compelling CTA text', write the actual text\n- Describe visual changes in plain language with specific values ('Change the button color to a bright orange like #FF6B35' not 'use a contrasting color')\n- Include screenshots-style descriptions of where things are in their admin panel\n\nIf the user's industry is regulated (healthcare, financial services, etc.), apply marketing-compliance guidelines and flag anything that needs legal review.",
-
+        "system_prompt": "You are a CTA implementation specialist. The user has chosen one of three CTA optimization strategies. Your job is to turn that into a step-by-step plan that a NON-TECHNICAL person can follow.\n\nThis means:\n- No code unless absolutely necessary (and if so, provide it ready to copy-paste with exact instructions on where to put it)\n- Use platform-specific terminology they'd see in their admin panel (e.g., 'Go to Online Store \u2192 Themes \u2192 Customize' for Shopify)\n- Include exact copy \u2014 don't say 'write compelling CTA text', write the actual text\n- Describe visual changes in plain language with specific values ('Change the button color to a bright orange like #FF6B35' not 'use a contrasting color')\n- Include screenshots-style descriptions of where things are in their admin panel\n\nIf the user's industry is regulated (healthcare, financial services, etc.), apply marketing-compliance guidelines and flag anything that needs legal review.",
         "processing_steps": [
           {
             "id": "build-plan",
             "description": "Create a comprehensive, non-technical implementation plan for the chosen CTA strategy",
-            "prompt": "## Context\n- **Business:** {{input.business_context}}\n- **Current CTAs:** {{input.cta_inventory}}\n- **Website:** {{input.website_url}}\n- **Conversion goal:** {{input.conversion_goal}}\n- **Industry research:** {{input.industry_research}}\n- **All strategies presented:** {{input.all_strategies}}\n- **Chosen strategy:** {{input.chosen_strategy}}\n- **User constraints:** {{input.user_constraints}}\n\n## Instructions\n\nBuild a complete implementation plan. Include ALL of the following:\n\n### 1. Strategy Recap\n- What we're changing and why\n- Which pages are affected\n- Expected conversion lift with assumptions\n\n### 2. Exact CTA Copy\nFor EVERY CTA that needs to change:\n\n**Page: [page name]**\n- Current: \"[exact current copy]\"\n- New primary: \"[exact new copy]\"\n- New supporting text: \"[exact microcopy]\"\n- Dismiss text (if applicable): \"[exact dismiss copy]\"\n\nProvide 2-3 copy variants for A/B testing. Explain the psychology behind each variant.\n\n### 3. Visual & Design Changes\nFor each CTA change, describe in non-technical terms:\n- **Button color:** exact hex code + plain language (\"a bright coral orange, hex #FF6B35\")\n- **Button size:** approximate dimensions in plain language (\"make it about twice the size of the current button\" or specific px values)\n- **Position on page:** exactly where it goes (\"directly below the hero image, centered, with about an inch of white space above and below\")\n- **Mobile behavior:** what happens on phones (\"the button becomes full-width and sticks to the bottom of the screen as you scroll\")\n- **Hover effect:** what happens when you mouse over it\n\n### 4. Page-by-Page Implementation Steps\nFor EACH page that needs changes, provide:\n\n**Page: [page name]**\n1. [Step 1 — platform-specific instruction, e.g., 'Log into your Shopify admin']\n2. [Step 2 — e.g., 'Go to Online Store → Themes → Customize']\n3. [Step 3 — e.g., 'Click on the hero section']\n...\n\nInclude what menu items to click, what fields to change, what to type where. Assume zero technical knowledge.\n\nIf any step requires a developer:\n- Mark it clearly: \"**Developer needed for this step**\"\n- Provide the exact code or instructions to give the developer\n- Estimate cost if hiring a freelancer (e.g., '~$50-100 on Fiverr/Upwork')\n\n### 5. A/B Testing Plan\n- What to test: control (current CTA) vs variant (new CTA)\n- How to set up the test on their platform (specific tool/app recommendations)\n- How long to run it (based on their likely traffic level)\n- What numbers to look at\n- When to declare a winner\n- Plain-language explanation of statistical significance (\"You need at least X visitors to each version before the results mean anything\")\n\n### 6. Metrics to Track\n- What to measure (in plain language)\n- How to check these numbers on their platform\n- What 'good' looks like after 30 days\n- Warning signs that something went wrong\n\n### 7. This Week's Checklist\nNumbered, actionable steps they can start today:\n- [ ] Step 1: ...\n- [ ] Step 2: ...\n- (aim for 5-8 concrete steps)\n\n### 8. What Comes Next\n- What to do if the test wins\n- What to do if the test loses\n- Additional CTA optimizations to consider after this one\n- When to re-run this analysis (recommend every 90 days)\n\n---\n\nSave the complete plan to KB using add_file_to_kb with title: 'CTA Implementation Plan: [strategy name] — [date]'.\nAlso create a document artifact for the user to reference."
+            "prompt": "## Context\n- **Business:** {{input.business_context}}\n- **Current CTAs:** {{input.cta_inventory}}\n- **Website:** {{input.website_url}}\n- **Conversion goal:** {{input.conversion_goal}}\n- **Industry research:** {{input.industry_research}}\n- **All strategies presented:** {{input.all_strategies}}\n- **Chosen strategy:** {{input.chosen_strategy}}\n- **User constraints:** {{input.user_constraints}}\n\n## Instructions\n\nBuild a complete implementation plan. Include ALL of the following:\n\n### 1. Strategy Recap\n- What we're changing and why\n- Which pages are affected\n- Expected conversion lift with assumptions\n\n### 2. Exact CTA Copy\nFor EVERY CTA that needs to change:\n\n**Page: [page name]**\n- Current: \"[exact current copy]\"\n- New primary: \"[exact new copy]\"\n- New supporting text: \"[exact microcopy]\"\n- Dismiss text (if applicable): \"[exact dismiss copy]\"\n\nProvide 2-3 copy variants for A/B testing. Explain the psychology behind each variant.\n\n### 3. Visual & Design Changes\nFor each CTA change, describe in non-technical terms:\n- **Button color:** exact hex code + plain language (\"a bright coral orange, hex #FF6B35\")\n- **Button size:** approximate dimensions in plain language (\"make it about twice the size of the current button\" or specific px values)\n- **Position on page:** exactly where it goes (\"directly below the hero image, centered, with about an inch of white space above and below\")\n- **Mobile behavior:** what happens on phones (\"the button becomes full-width and sticks to the bottom of the screen as you scroll\")\n- **Hover effect:** what happens when you mouse over it\n\n### 4. Page-by-Page Implementation Steps\nFor EACH page that needs changes, provide:\n\n**Page: [page name]**\n1. [Step 1 \u2014 platform-specific instruction, e.g., 'Log into your Shopify admin']\n2. [Step 2 \u2014 e.g., 'Go to Online Store \u2192 Themes \u2192 Customize']\n3. [Step 3 \u2014 e.g., 'Click on the hero section']\n...\n\nInclude what menu items to click, what fields to change, what to type where. Assume zero technical knowledge.\n\nIf any step requires a developer:\n- Mark it clearly: \"**Developer needed for this step**\"\n- Provide the exact code or instructions to give the developer\n- Estimate cost if hiring a freelancer (e.g., '~$50-100 on Fiverr/Upwork')\n\n### 5. A/B Testing Plan\n- What to test: control (current CTA) vs variant (new CTA)\n- How to set up the test on their platform (specific tool/app recommendations)\n- How long to run it (based on their likely traffic level)\n- What numbers to look at\n- When to declare a winner\n- Plain-language explanation of statistical significance (\"You need at least X visitors to each version before the results mean anything\")\n\n### 6. Metrics to Track\n- What to measure (in plain language)\n- How to check these numbers on their platform\n- What 'good' looks like after 30 days\n- Warning signs that something went wrong\n\n### 7. This Week's Checklist\nNumbered, actionable steps they can start today:\n- [ ] Step 1: ...\n- [ ] Step 2: ...\n- (aim for 5-8 concrete steps)\n\n### 8. What Comes Next\n- What to do if the test wins\n- What to do if the test loses\n- Additional CTA optimizations to consider after this one\n- When to re-run this analysis (recommend every 90 days)\n\n---\n\nSave the complete plan to KB using add_file_to_kb with title: 'CTA Implementation Plan: [strategy name] \u2014 [date]'.\nAlso create a document artifact for the user to reference."
+          }
+        ]
+      },
+      "validation": {
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 1000
+            }
           }
         ]
       }

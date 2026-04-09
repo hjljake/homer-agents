@@ -1,0 +1,187 @@
+{
+  "agent_id": "aov-accelerator",
+  "description": "Test fixtures for the Upsell Advisor workflow (upsell-context-gatherer -> confirm -> upsell-competitive-researcher -> strategies -> select -> upsell-strategy-deepener)",
+  "test_cases": [
+    {
+      "test_id": "upsell-digital",
+      "description": "Digital product store selling online courses and downloadable templates — tests upsell strategies for digital goods with instant delivery, bundle pricing, and course tier upgrades",
+      "inputs": {
+        "responses": {
+          "checkout": {
+            "url": "https://example-learncraft.com/checkout"
+          }
+        },
+        "pause_responses": {
+          "confirm_business": {
+            "business_accurate": true,
+            "corrections": "We also sell a membership tier ($29/mo) that gives access to all courses. Most customers buy individual courses at $49-$149 each. Our AOV is around $67.",
+            "checkout_method": "Stripe Checkout (hosted)",
+            "checkout_url": "https://example-learncraft.com/checkout",
+            "checkout_details": "Customer selects a course, clicks Buy Now, goes to a Stripe-hosted checkout page. No cart — single product purchase. No upsells currently. We accept cards and Apple Pay.",
+            "checkout_screenshots": null
+          },
+          "select_strategy": {
+            "chosen_strategy": "Strategy A",
+            "additional_input": "We use Stripe for everything. We're open to adding a cart page if needed but prefer minimal development. We can't offer more than 20% discount on bundles."
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "business_summary",
+          "checkout_analysis"
+        ],
+        "step_outputs": {
+          "gather_context": [
+            "digital product",
+            "course",
+            "Stripe",
+            "AOV"
+          ],
+          "competitive_research": [
+            "digital product",
+            "course bundle",
+            "upsell",
+            "AOV lift"
+          ],
+          "generate_strategies": [
+            "Strategy A",
+            "Strategy B",
+            "Strategy C",
+            "Recommendation",
+            "AOV"
+          ],
+          "deepen_strategy": [
+            "Implementation",
+            "A/B Testing",
+            "Stripe",
+            "copy variant"
+          ]
+        }
+      },
+      "output_must_not_contain": [
+        "shipping",
+        "physical fulfillment",
+        "warehouse",
+        "inventory management",
+        "return policy"
+      ],
+      "kb_save_check": {
+        "expected_saves": [
+          {
+            "title_pattern": "Upsell Analysis: Business Context",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "Upsell Best Practices: .* digital",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "Upsell Implementation Plan:",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          }
+        ],
+        "expected_artifacts": [
+          {
+            "title_pattern": "AOV Accelerator: Upsell Strategy Implementation Plan",
+            "tool": "create_document_artifact"
+          }
+        ]
+      }
+    },
+    {
+      "test_id": "upsell-physical",
+      "description": "Physical product ecommerce store selling premium kitchen knives — tests upsell strategies for physical goods with cart-based checkout, shipping thresholds, and complementary product add-ons",
+      "inputs": {
+        "responses": {
+          "checkout": {
+            "url": "https://example-chefedge.com"
+          }
+        },
+        "pause_responses": {
+          "confirm_business": {
+            "business_accurate": false,
+            "corrections": "Our AOV is actually $125, not what was found in KB. We sell premium kitchen knives ($80-$350), cutting boards ($40-$120), and knife care kits ($25-$60). Most customers buy one knife. Free shipping starts at $150.",
+            "checkout_method": "Shopify checkout",
+            "checkout_url": "https://example-chefedge.com/checkout",
+            "checkout_details": "Customer browses products, adds to cart (slide-out cart drawer), then clicks Checkout which goes to the standard Shopify checkout. We have a 'You might also like' section on product pages but nothing in the cart drawer or checkout.",
+            "checkout_screenshots": null
+          },
+          "select_strategy": {
+            "chosen_strategy": "Strategy C",
+            "additional_input": "We're on Shopify Plus so we can customize the checkout. We already use the Rebuy app for product recommendations on product pages but it's not performing well. We'd like to focus on the cart drawer and checkout upsell opportunities."
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "business_summary",
+          "checkout_analysis"
+        ],
+        "step_outputs": {
+          "gather_context": [
+            "physical product",
+            "Shopify",
+            "AOV",
+            "kitchen"
+          ],
+          "competitive_research": [
+            "physical product",
+            "free shipping threshold",
+            "cart",
+            "complementary"
+          ],
+          "generate_strategies": [
+            "Strategy A",
+            "Strategy B",
+            "Strategy C",
+            "Recommendation",
+            "AOV"
+          ],
+          "deepen_strategy": [
+            "Implementation",
+            "A/B Testing",
+            "Shopify",
+            "cart drawer",
+            "checkout"
+          ]
+        }
+      },
+      "output_must_not_contain": [
+        "digital download",
+        "course",
+        "membership tier",
+        "Stripe Checkout hosted",
+        "subscription signup"
+      ],
+      "kb_save_check": {
+        "expected_saves": [
+          {
+            "title_pattern": "Upsell Analysis: Business Context",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "Upsell Best Practices: .* (kitchen|ecommerce|physical)",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "Upsell Implementation Plan:",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          }
+        ],
+        "expected_artifacts": [
+          {
+            "title_pattern": "AOV Accelerator: Upsell Strategy Implementation Plan",
+            "tool": "create_document_artifact"
+          }
+        ]
+      }
+    }
+  ]
+}

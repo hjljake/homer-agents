@@ -1,0 +1,183 @@
+{
+  "agent_id": "conversion-cta-specialist",
+  "description": "Test fixtures for the CTA Specialist workflow (cta-website-analyzer -> confirm -> cta-industry-researcher -> strategies -> select -> cta-implementation-planner)",
+  "test_cases": [
+    {
+      "test_id": "cta-ecommerce",
+      "description": "Ecommerce website selling artisan candles — tests product-focused CTA analysis with Shopify-style checkout flow and product page CTAs",
+      "inputs": {
+        "responses": {
+          "website": {
+            "url": "https://example-candle-co.com"
+          }
+        },
+        "pause_responses": {
+          "confirm_cta_inventory": {
+            "business_accurate": true,
+            "business_corrections": "",
+            "cta_inventory_accurate": true,
+            "cta_corrections": "We also have a sticky 'Add to Cart' bar on mobile product pages that wasn't captured",
+            "conversion_goal": "Buy a product — specifically increase product page to checkout conversion rate",
+            "known_issues": "Our mobile conversion rate is 40% lower than desktop. The 'Add to Cart' button blends into the background on product pages."
+          },
+          "select_strategy": {
+            "chosen_strategy": "Strategy A",
+            "additional_input": "We use Shopify and can only edit through the theme editor. No developer access. Budget is tight — prefer free or low-cost apps."
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "cta_inventory",
+          "business_context"
+        ],
+        "step_outputs": {
+          "analyze_website": [
+            "product page",
+            "Add to Cart",
+            "homepage"
+          ],
+          "industry_research": [
+            "ecommerce",
+            "conversion rate",
+            "benchmark"
+          ],
+          "generate_strategies": [
+            "Strategy A",
+            "Strategy B",
+            "Strategy C",
+            "Recommendation"
+          ],
+          "build_implementation_plan": [
+            "Implementation",
+            "A/B Testing",
+            "Checklist",
+            "mobile"
+          ]
+        }
+      },
+      "output_must_not_contain": [
+        "SaaS",
+        "free trial",
+        "signup form",
+        "demo request",
+        "subscription plan"
+      ],
+      "kb_save_check": {
+        "expected_saves": [
+          {
+            "title_pattern": "CTA Audit: .* candle",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          },
+          {
+            "title_pattern": "CTA Best Practices: .* ecommerce",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "CTA Implementation Plan:",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          }
+        ],
+        "expected_artifacts": [
+          {
+            "title_pattern": "CTA Optimization: Implementation Plan",
+            "tool": "create_document_artifact"
+          }
+        ]
+      }
+    },
+    {
+      "test_id": "cta-saas",
+      "description": "SaaS website for a project management tool — tests signup/demo CTAs with freemium funnel, pricing page analysis, and lead generation focus",
+      "inputs": {
+        "responses": {
+          "website": {
+            "url": "https://example-projectflow.io"
+          }
+        },
+        "pause_responses": {
+          "confirm_cta_inventory": {
+            "business_accurate": false,
+            "business_corrections": "We're B2B not B2C. Our primary audience is engineering teams at mid-market companies (100-1000 employees). We have a freemium tier and a 14-day trial for paid plans.",
+            "cta_inventory_accurate": false,
+            "cta_corrections": "You missed the exit-intent popup that shows 'Start Free Trial' when users try to leave the pricing page. Also, the 'Book a Demo' CTA only shows for enterprise plan visitors.",
+            "conversion_goal": "Sign up for a free trial — this is our #1 growth metric",
+            "known_issues": "Pricing page has the highest bounce rate on the site (68%). Users seem confused between the free plan and the trial — our CTAs say different things on different pages."
+          },
+          "select_strategy": {
+            "chosen_strategy": "Strategy B",
+            "additional_input": "We built the site on Webflow and have a developer who can implement custom changes. We can use any tools. Main constraint: we can't change the pricing structure — only the CTAs and page layout."
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "cta_inventory",
+          "business_context"
+        ],
+        "step_outputs": {
+          "analyze_website": [
+            "pricing page",
+            "free trial",
+            "Sign up",
+            "Book a Demo"
+          ],
+          "industry_research": [
+            "SaaS",
+            "freemium",
+            "trial",
+            "conversion"
+          ],
+          "generate_strategies": [
+            "Strategy A",
+            "Strategy B",
+            "Strategy C",
+            "Recommendation",
+            "pricing page"
+          ],
+          "build_implementation_plan": [
+            "Implementation",
+            "A/B Testing",
+            "free trial",
+            "Webflow"
+          ]
+        }
+      },
+      "output_must_not_contain": [
+        "Add to Cart",
+        "Buy Now",
+        "checkout",
+        "shipping",
+        "physical product"
+      ],
+      "kb_save_check": {
+        "expected_saves": [
+          {
+            "title_pattern": "CTA Audit: .* ProjectFlow",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          },
+          {
+            "title_pattern": "CTA Best Practices: .* SaaS",
+            "tool": "add_file_to_kb",
+            "min_length": 500
+          },
+          {
+            "title_pattern": "CTA Implementation Plan:",
+            "tool": "add_file_to_kb",
+            "min_length": 1000
+          }
+        ],
+        "expected_artifacts": [
+          {
+            "title_pattern": "CTA Optimization: Implementation Plan",
+            "tool": "create_document_artifact"
+          }
+        ]
+      }
+    }
+  ]
+}

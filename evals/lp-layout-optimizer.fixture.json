@@ -1,0 +1,61 @@
+{
+  "agent_id": "lp-layout-optimizer",
+  "test_cases": [
+    {
+      "test_id": "layout-cold-with-scorecard",
+      "description": "Cold traffic layout audit with scorecard in KB -- should produce 8-dimension rubric, section map, and CTA rhythm",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["section_map", "layout_rubric", "cta_rhythm", "mobile_stacking_assessment", "layout_score"],
+        "layout_score_range": [0, 16],
+        "rubric_dimensions": 8,
+        "section_reorder_recommendations": true,
+        "cta_rhythm_map_present": true
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Layout Recommendations:.*Cold.*",
+        "yaml_type": "lp-layout-recommendations",
+        "yaml_fields_present": ["layout_score", "source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "layout-standalone",
+      "description": "Cold traffic layout audit with NO scorecard -- tests degradation to crawl-only analysis",
+      "inputs": {
+        "lp.url": "https://example-agency.com/services/seo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Organic search",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["section_map", "layout_rubric", "cta_rhythm", "layout_score"],
+        "layout_score_range": [0, 16],
+        "rubric_dimensions": 8
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Layout Recommendations:.*Cold.*",
+        "yaml_type": "lp-layout-recommendations",
+        "yaml_fields_present": ["layout_score", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

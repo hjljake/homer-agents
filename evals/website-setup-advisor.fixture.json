@@ -1,0 +1,183 @@
+{
+  "agent_id": "website-setup-advisor",
+  "description": "Test fixtures for the Website Setup Advisor agent — a single GPA with assess-and-recommend + generate-setup-guide processing steps. Tests both the no-website (full setup) and has-website-needs-blog paths.",
+  "test_cases": [
+    {
+      "test_id": "setup-no-website",
+      "description": "Non-technical user with no website at all — tests full platform recommendation and step-by-step setup guide generation including domain registration, page setup, and blog configuration",
+      "inputs": {
+        "responses": {
+          "website": {
+            "status": "I have no website at all",
+            "business": "We run a mobile dog grooming service in Austin, TX. We go to customers' homes with our grooming van. Our clients are busy professionals with medium to large dogs.",
+            "ecommerce": "No — service-based or no online sales",
+            "budget": "As little as possible (under $20/mo)",
+            "has_domain": "No — I need to get one",
+            "tech_level": "Not at all — I need everything explained step by step",
+            "timeline": "Within a month"
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "Your Situation",
+          "Our Recommendation",
+          "Runner-Up",
+          "Domain Guidance",
+          "Getting Started",
+          "Essential Pages",
+          "Blog Setup",
+          "Pre-Launch Checklist"
+        ],
+        "processing_step_outputs": {
+          "assess-and-recommend": [
+            "service-based",
+            "dog grooming",
+            "budget",
+            "Amiara integration",
+            "domain"
+          ],
+          "generate-setup-guide": [
+            "Home",
+            "About",
+            "Services",
+            "Contact",
+            "Blog",
+            "Privacy Policy",
+            "URL structure",
+            "/blog/",
+            "sitemap",
+            "Google Search Console",
+            "mobile",
+            "SSL"
+          ]
+        },
+        "platform_recommendation": {
+          "must_include_rationale": true,
+          "must_include_cost_estimate": true,
+          "must_include_amiara_integration_note": true
+        }
+      },
+      "output_must_not_contain": [
+        "existing platform",
+        "your current website",
+        "migrate",
+        "subdomain blog",
+        "your WordPress site",
+        "add a blog to your existing"
+      ],
+      "kb_save_check": {
+        "expected_saves": [],
+        "expected_artifacts": [
+          {
+            "title_pattern": "Website Setup Guide",
+            "tool": "create_document_artifact"
+          }
+        ],
+        "expected_business_facts": [
+          {
+            "key": "website_platform_recommendation",
+            "tool": "manage_business_fact"
+          }
+        ]
+      },
+      "validation_checks": {
+        "input_rules_pass": {
+          "responses.website.status": { "required": true },
+          "responses.website.business": { "min_length": 20, "value_length": 155 },
+          "responses.website.budget": { "required": true }
+        },
+        "conditional_questions_triggered": false,
+        "path": "no-website-full-setup"
+      }
+    },
+    {
+      "test_id": "setup-has-website-needs-blog",
+      "description": "User has an existing Shopify website but needs to add a blog section — tests the add-blog-to-existing-site path with platform-specific blog setup guidance and SEO configuration",
+      "inputs": {
+        "responses": {
+          "website": {
+            "status": "I have a website but need to add a blog",
+            "business": "We sell handmade jewelry online through Shopify. Our customers are women aged 25-45 who value artisan craftsmanship. We do about $40K/month in revenue.",
+            "ecommerce": "Yes — I sell physical products",
+            "budget": "Moderate ($20-50/mo)",
+            "has_domain": "Yes — I own a domain",
+            "tech_level": "Somewhat — I can follow instructions and figure things out",
+            "timeline": "This week",
+            "existing_url": "https://example-lumiere-jewelry.com",
+            "existing_platform": "Shopify"
+          }
+        }
+      },
+      "output_must_contain": {
+        "sections": [
+          "Your Situation",
+          "Our Recommendation",
+          "Blog Setup",
+          "Pre-Launch Checklist"
+        ],
+        "processing_step_outputs": {
+          "assess-and-recommend": [
+            "Shopify",
+            "existing",
+            "blog",
+            "jewelry",
+            "ecommerce",
+            "Amiara integration"
+          ],
+          "generate-setup-guide": [
+            "Blog",
+            "Shopify",
+            "/blog/",
+            "URL structure",
+            "category",
+            "sitemap",
+            "SEO",
+            "Google Search Console"
+          ]
+        },
+        "blog_addition_guidance": {
+          "must_address_shopify_blog_limitations": true,
+          "must_mention_native_vs_subdomain_option": true,
+          "must_include_url_structure_recommendation": true
+        }
+      },
+      "output_must_not_contain": [
+        "domain registration",
+        "registrar",
+        "choose a domain name",
+        "Namecheap",
+        "you don't have a website",
+        "no website at all"
+      ],
+      "kb_save_check": {
+        "expected_saves": [],
+        "expected_artifacts": [
+          {
+            "title_pattern": "Website Setup Guide",
+            "tool": "create_document_artifact"
+          }
+        ],
+        "expected_business_facts": [
+          {
+            "key": "website_platform_recommendation",
+            "tool": "manage_business_fact"
+          }
+        ]
+      },
+      "validation_checks": {
+        "input_rules_pass": {
+          "responses.website.status": { "required": true },
+          "responses.website.business": { "min_length": 20, "value_length": 140 },
+          "responses.website.budget": { "required": true }
+        },
+        "conditional_questions_triggered": true,
+        "conditional_fields_present": [
+          "responses.website.existing_url",
+          "responses.website.existing_platform"
+        ],
+        "path": "has-website-add-blog"
+      }
+    }
+  ]
+}

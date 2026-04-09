@@ -219,7 +219,7 @@
       {
         "id": "gather-scorecard-or-crawl",
         "description": "Check for prior scorecard analysis or fall back to lightweight page crawl",
-        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nUser's score corrections: {{responses.lp.score_corrections}}\nUser's constraints: {{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Check for prior scorecard analysis.** Look through your KB search results for a document with `type: lp-scorecard-analysis` matching the user's landing page URL and traffic type.\n\n2. **If found and fresh (research_date < 30 days old):**\n   - Extract: scorecard_results, business_context, page_url, page_goal, traffic_source, overall_score, top_strengths, top_issues\n   - For warm traffic: also extract referring_message, visitor_relationship, message_match_assessment\n   - Apply any user corrections from {{responses.lp.score_corrections}}\n   - Note: \"Using existing scorecard analysis from [date]. Score: [X/100].\"\n\n3. **If found but stale (research_date > 30 days old):**\n   - Extract the same data\n   - Prepend warning: \"The scorecard analysis for this page is from [date] and may be outdated. We recommend re-running the LP Scorecard Analyzer. Proceeding with available data.\"\n\n4. **If NOT found:**\n   - Use search_web to crawl the landing page at {{responses.lp.url}}\n   - Extract: page structure, all headlines and subheadlines, all CTAs (copy + placement), social proof elements, form fields, navigation elements\n   - Call manage_business_fact to retrieve business context\n   - Prepend note: \"No prior scorecard analysis found. Running with a lightweight page crawl. For more accurate recommendations, run the LP Scorecard Analyzer first.\""
+        "prompt": "Check your KB search results for a prior scorecard analysis of this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nUser's score corrections: {{responses.lp.score_corrections}}\nUser's constraints: {{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Check for prior scorecard analysis.** Look through your KB search results for a document with `type: lp-scorecard-analysis` matching the user's landing page URL and traffic type.\n\n**KB Result Verification:** When you find a prior analysis, check the `page_url` in its YAML header against the current target URL ({{responses.lp.url}}). If the URLs do not match, discard that result and proceed as if no prior analysis exists. Do not apply findings from one page to a different page.\n\n2. **If found and fresh (research_date < 30 days old):**\n   - Extract: scorecard_results, business_context, page_url, page_goal, traffic_source, overall_score, top_strengths, top_issues\n   - For warm traffic: also extract referring_message, visitor_relationship, message_match_assessment\n   - Apply any user corrections from {{responses.lp.score_corrections}}\n   - Note: \"Using existing scorecard analysis from [date]. Score: [X/100].\"\n\n3. **If found but stale (research_date > 30 days old):**\n   - Extract the same data\n   - Prepend warning: \"The scorecard analysis for this page is from [date] and may be outdated. We recommend re-running the LP Scorecard Analyzer. Proceeding with available data.\"\n\n4. **If NOT found:**\n   - Use search_web to crawl the landing page at {{responses.lp.url}}\n   - Extract: page structure, all headlines and subheadlines, all CTAs (copy + placement), social proof elements, form fields, navigation elements\n   - Call manage_business_fact to retrieve business context\n   - Prepend note: \"No prior scorecard analysis found. Running with a lightweight page crawl. For more accurate recommendations, run the LP Scorecard Analyzer first.\""
       },
       {
         "id": "optimize-headers",
@@ -228,6 +228,39 @@
           "gather-scorecard-or-crawl"
         ],
         "prompt": "## Scorecard Results\n{{prior_steps.gather-scorecard-or-crawl.content}}\n\n## Page URL\n{{responses.lp.url}}\n\n## Traffic Type\n{{responses.lp.traffic_type}}\n\n## Page Goal\n{{responses.lp.goal}}\n\n## Traffic Source\n{{responses.lp.traffic_source}}\n\n## Referring Message\n{{responses.lp.referring_message}}\n\n## Visitor Relationship\n{{responses.lp.visitor_relationship}}\n\n## User Corrections\n{{responses.lp.score_corrections}}\n\n## Constraints\n{{responses.lp.optimization_constraints}}\n\n## Instructions\n\n1. **Extract current hero scores.** For cold traffic: headline score (X/12), subheadline score (X/6). For warm traffic: headline score (X/8), subheadline score (X/4). Identify which specific criteria scored 0 or 1.\n\n2. **For warm traffic: evaluate message match.** Compare the referring message to the current headline. Score the match 0-2.\n\n3. **Research competitor headlines.** Use search_web to look at 3-5 competitor or best-in-class landing pages in this space. Note their headline approaches.\n\n4. **Generate 3-5 headline/subheadline combinations.** For each, provide:\n\n### Option [N]: [Formula Name]\n\n**Headline:** \"[exact headline text]\"\n**Subheadline:** \"[exact subheadline text]\"\n\n**Formula used:** For cold: [Dream Outcome / Pain-Agitation / Curiosity Gap / Social Proof Lead / Question-Based]. For warm: [Message Match / Relationship Acknowledgment / Offer-First / Exclusivity / Urgency].\n\n**Scorecard criteria improved:**\n[List each criterion with current → projected score and why]\n\n**Projected hero headline score:** [current] → [projected]\n**Projected hero subheadline score:** [current] → [projected]\n\n**Psychological rationale:** [Why this works for this specific ICP and traffic type — 2-3 sentences]\n\n**Character count:** Headline: [X chars] / Subheadline: [X chars]\n\n5. **Rank by projected impact.** Highest-impact option first.\n\n6. **Output as `header_recommendations`** including:\n- Current headline and subheadline (quoted exactly)\n- Current scores\n- Message match assessment (warm only)\n- All 3-5 options ranked by impact\n- Recommended top pick with reasoning\n- CTA copy suggestion that pairs with the recommended headline\n\nSave to KB using add_file_to_kb with title: 'LP Headline Recommendations: [business name] — {{responses.lp.traffic_type}} — [date]'.\n\nInclude a YAML header with:\ntype: lp-headline-recommendations\nlead_type: {{responses.lp.traffic_type}}\nresearch_date: [today's date]\npage_url: [URL]\nsource_scorecard_date: [date of scorecard used, or \"none\" if lightweight crawl]"
+      }
+    ]
+  },
+  "validation": {
+    "input_rules": [
+      {
+        "field": "responses.lp.url",
+        "rules": { "required": true, "type": "string" }
+      },
+      {
+        "field": "responses.lp.traffic_type",
+        "rules": { "required": true, "type": "string" }
+      },
+      {
+        "field": "responses.lp.traffic_source",
+        "rules": { "required": true, "type": "string" }
+      },
+      {
+        "field": "responses.lp.goal",
+        "rules": { "required": true, "type": "string" }
+      }
+    ],
+    "output_rules": [
+      {
+        "field": "content",
+        "rules": { "required": true, "min_length": 1500 }
+      }
+    ],
+    "quality_checks": [
+      {
+        "id": "variant-count",
+        "description": "Verify 3-5 headline/subheadline combos with projected scores",
+        "prompt": "Verify the output contains 3-5 headline/subheadline combination options, each with a projected score showing current and projected values. Return PASS if count is 3-5 with scores, FAIL with actual count."
       }
     ]
   }

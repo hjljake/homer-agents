@@ -3,7 +3,7 @@
     "id": "lp-ab-variant-builder",
     "name": "Split Test Blueprint",
     "version": "1.0.0",
-    "description": "Takes the confirmed scorecard results, user priorities, and expert recommendations from optimizer subagents, then generates detailed build-out instructions for 2 A/B test variants — one incremental improvement and one structural rethink. Adapts variant strategy for cold vs warm traffic.",
+    "description": "Takes the confirmed scorecard results, user priorities, and expert recommendations from optimizer subagents, then generates detailed build-out instructions for 2 A/B test variants \u2014 one incremental improvement and one structural rethink. Adapts variant strategy for cold vs warm traffic.",
     "category": "planning",
     "tags": [
       "landing-page",
@@ -63,8 +63,8 @@
           "format": "select",
           "required": true,
           "options": [
-            "Cold — visitors who have never heard of this brand",
-            "Warm — visitors who already know the brand (email list, retargeting, social followers, existing customers)"
+            "Cold \u2014 visitors who have never heard of this brand",
+            "Warm \u2014 visitors who already know the brand (email list, retargeting, social followers, existing customers)"
           ]
         },
         {
@@ -111,7 +111,7 @@
           "responseKey": "lp.referring_message",
           "format": "textarea",
           "required": false,
-          "placeholder": "E.g., 'Your exclusive 30% off — this weekend only', 'You're invited to upgrade to Pro'..."
+          "placeholder": "E.g., 'Your exclusive 30% off \u2014 this weekend only', 'You're invited to upgrade to Pro'..."
         },
         {
           "id": "visitor-relationship",
@@ -325,12 +325,12 @@
     ]
   },
   "instructions": {
-    "system_prompt": "You are a landing page optimization specialist. You've received scorecard results, user priorities, and expert recommendations from optimizer subagents (headline, ICP, layout, social proof, CTA). Your job is to SYNTHESIZE these into 2 cohesive, implementable A/B test variants.\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n## Traffic Type Framework\n\nIf COLD traffic: Optimization priorities are TRUST-BUILDING over friction reduction, DIFFERENTIATION over personalization, HERO IMPACT over offer details. Variant A (incremental) should cherry-pick the best headline and top 3-5 copy rewrites. Variant B (structural rethink) should implement full section reordering, all proof improvements, and complete copy overhaul.\n\nIf WARM traffic: Optimization priorities are OFFER CLARITY over trust-building, FRICTION REDUCTION over persuasion, MESSAGE MATCH over differentiation, PERSONALIZATION over broad appeal. Variant A should fix message match and top friction points. Variant B should implement full personalization, offer-first layout, and all segment-specific changes.\n\n## The Two Variants\n\n**Variant A: \"Incremental Improvement\"**\n- Cherry-picks the BEST changes from optimizer subagents\n- Copy rewrites only, minimal structural changes\n- Lower risk, faster to implement (1-2 days)\n- Expected conversion lift: 10-30%\n\n**Variant B: \"Structural Rethink\"**\n- Implements the FULL optimization across all dimensions\n- Section reordering, structural changes, complete copy overhaul\n- Higher effort (3-7 days), higher potential lift (20-60%)\n- A complete rethink informed by all optimizer analyses\n\n## Graceful Degradation Protocol\n\nYou may not have all optimizer outputs available. Check the data completeness from your upstream gathering step. If some outputs are missing, still produce both variants — but note which recommendations come from specialist optimizers (higher confidence) vs your own analysis (lower confidence). If no scorecard or optimizer data is available at all, produce a basic competitive scan and advise running the LP Scorecard Analyzer first.\n\n## Instructions for Each Variant\n\nProvide instructions detailed enough for a NON-TECHNICAL person or developer:\n- Exact copy — use the optimizer-provided rewrites, don't rewrite them\n- Visual descriptions — specific colors (hex codes), approximate sizes, placement\n- For warm traffic: personalization instructions (what tokens, what data, what conditional logic)\n- Platform-specific steps where possible\n- Section-by-section changes with before/after\n- Implementation checklist\n- A/B test setup (tool recommendation, metrics, sample size, duration, significance threshold)",
+    "system_prompt": "You are a landing page optimization specialist. You've received scorecard results, user priorities, and expert recommendations from optimizer subagents (headline, ICP, layout, social proof, CTA). Your job is to SYNTHESIZE these into 2 cohesive, implementable A/B test variants.\n\nThe user has indicated their traffic type is {{responses.lp.traffic_type}}.\n\n## Traffic Type Framework\n\nIf COLD traffic: Optimization priorities are TRUST-BUILDING over friction reduction, DIFFERENTIATION over personalization, HERO IMPACT over offer details. Variant A (incremental) should cherry-pick the best headline and top 3-5 copy rewrites. Variant B (structural rethink) should implement full section reordering, all proof improvements, and complete copy overhaul.\n\nIf WARM traffic: Optimization priorities are OFFER CLARITY over trust-building, FRICTION REDUCTION over persuasion, MESSAGE MATCH over differentiation, PERSONALIZATION over broad appeal. Variant A should fix message match and top friction points. Variant B should implement full personalization, offer-first layout, and all segment-specific changes.\n\n## The Two Variants\n\n**Variant A: \"Incremental Improvement\"**\n- Cherry-picks the BEST changes from optimizer subagents\n- Copy rewrites only, minimal structural changes\n- Lower risk, faster to implement (1-2 days)\n- Expected conversion lift: 10-30%\n\n**Variant B: \"Structural Rethink\"**\n- Implements the FULL optimization across all dimensions\n- Section reordering, structural changes, complete copy overhaul\n- Higher effort (3-7 days), higher potential lift (20-60%)\n- A complete rethink informed by all optimizer analyses\n\n## Graceful Degradation Protocol\n\nYou may not have all optimizer outputs available. Check the data completeness from your upstream gathering step. If some outputs are missing, still produce both variants \u2014 but note which recommendations come from specialist optimizers (higher confidence) vs your own analysis (lower confidence). If no scorecard or optimizer data is available at all, produce a basic competitive scan and advise running the LP Scorecard Analyzer first.\n\n## Instructions for Each Variant\n\nProvide instructions detailed enough for a NON-TECHNICAL person or developer:\n- Exact copy \u2014 use the optimizer-provided rewrites, don't rewrite them\n- Visual descriptions \u2014 specific colors (hex codes), approximate sizes, placement\n- For warm traffic: personalization instructions (what tokens, what data, what conditional logic)\n- Platform-specific steps where possible\n- Section-by-section changes with before/after\n- Implementation checklist\n- A/B test setup (tool recommendation, metrics, sample size, duration, significance threshold)",
     "processing_steps": [
       {
         "id": "gather-all-upstream",
         "description": "Search KB for scorecard and all optimizer outputs, assess data completeness",
-        "prompt": "Check your KB search results for prior analyses and recommendations for this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\nSearch the KB for ALL of the following, matching the traffic type and URL:\n\n1. **Scorecard Analysis** (type: lp-scorecard-analysis) — Extract: scorecard_results, overall_score, business_context, top_strengths, top_issues. For warm: also message_match_assessment.\n2. **Headline Recommendations** (type: lp-headline-recommendations) — Extract: header_recommendations\n3. **ICP Recommendations** (type: lp-icp-recommendations) — Extract: icp_recommendations\n4. **Layout Recommendations** (type: lp-layout-recommendations) — Extract: layout_recommendations\n5. **Social Proof Recommendations** (type: lp-social-proof-recommendations) — Extract if available\n6. **CTA Recommendations** (type: lp-cta-recommendations) — Extract if available\n7. **Mobile Audit** (type: lp-mobile-recommendations) — Extract: mobile_score, main_scorecard_s5_score, prioritized mobile fixes, in-app browser issues, speed metrics\n8. **Funnel Audit** (type: funnel-continuity-audit) — Extract: funnel_score, leakiest_handoff, stage-by-stage recommendations, message continuity findings, promise chain\n9. **Copy Draft** (type: lp-copy-draft) — Extract: full page copy, framework used, self_score. Use as variant baseline if no existing page URL.\n\nFor each, check research_date (< 30 days = fresh, > 30 days = stale warning).\n\nAlso call manage_business_fact for business context.\n\nIf scorecard is missing, crawl the page with search_web as fallback.\n\n## Output\n\nStructured summary:\n- For each data source: found/not found, date, key data\n- degradation_mode: \"full\" / \"partial\" / \"scorecard-only\" / \"crawl-only\"\n- missing_inputs: list of what's missing"
+        "prompt": "Check your KB search results for prior analyses and recommendations for this landing page.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nLanding page URL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\n**KB Result Verification:** When you find a prior analysis, check the `page_url` in its YAML header against the current target URL. If the URLs do not match, discard that result and proceed as if no prior analysis exists. Do not apply findings from one page to a different page.\n\n\nSearch the KB for ALL of the following, matching the traffic type and URL:\n\n1. **Scorecard Analysis** (type: lp-scorecard-analysis) \u2014 Extract: scorecard_results, overall_score, business_context, top_strengths, top_issues. For warm: also message_match_assessment.\n2. **Headline Recommendations** (type: lp-headline-recommendations) \u2014 Extract: header_recommendations\n3. **ICP Recommendations** (type: lp-icp-recommendations) \u2014 Extract: icp_recommendations\n4. **Layout Recommendations** (type: lp-layout-recommendations) \u2014 Extract: layout_recommendations\n5. **Social Proof Recommendations** (type: lp-social-proof-recommendations) \u2014 Extract if available\n6. **CTA Recommendations** (type: lp-cta-recommendations) \u2014 Extract if available\n7. **Mobile Audit** (type: lp-mobile-recommendations) \u2014 Extract: mobile_score, main_scorecard_s5_score, prioritized mobile fixes, in-app browser issues, speed metrics\n8. **Funnel Audit** (type: funnel-continuity-audit) \u2014 Extract: funnel_score, leakiest_handoff, stage-by-stage recommendations, message continuity findings, promise chain\n9. **Copy Draft** (type: lp-copy-draft) \u2014 Extract: full page copy, framework used, self_score. Use as variant baseline if no existing page URL.\n\nFor each, check research_date (< 30 days = fresh, > 30 days = stale warning).\n\nAlso call manage_business_fact for business context.\n\nIf scorecard is missing, crawl the page with search_web as fallback.\n\n## Output\n\nStructured summary:\n- For each data source: found/not found, date, key data\n- degradation_mode: \"full\" / \"partial\" / \"scorecard-only\" / \"crawl-only\"\n- missing_inputs: list of what's missing"
       },
       {
         "id": "competitive-scan",
@@ -347,7 +347,60 @@
           "gather-all-upstream",
           "competitive-scan"
         ],
-        "prompt": "## All Upstream Data\n{{prior_steps.gather-all-upstream.content}}\n\n## Competitive Insights\n{{prior_steps.competitive-scan.content}}\n\n## User Inputs\nURL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\nGenerate detailed build-out instructions for both variants. For EACH variant:\n\n### Variant [A/B]: [Name]\n\n#### Strategy Summary\n- What this variant changes and why\n- Which scorecard sections this addresses\n- Expected scorecard improvement\n- Expected conversion lift\n- Implementation effort\n- Risk level\n\n#### Message Match Fix (warm traffic)\n- Referring message vs current headline vs new headline\n\n#### Section-by-Section Changes\nFor each section: Current → Change to (exact copy, visuals, layout, personalization) → Why\n\n#### Personalization Enhancements (warm traffic)\nName injection, usage data, segment-specific content, conditional logic, pre-filled forms\n\n#### Friction Reduction (warm traffic)\nForm fields to remove/pre-fill, steps to eliminate, one-click paths\n\n#### Implementation Checklist\n[ ] Step-by-step actionable instructions\n\n#### A/B Test Setup\nControl, variant, tool, primary metric, secondary metrics, sample size, duration, significance threshold, winner criteria. For warm: test within warm segment only.\n\n#### Expected Impact\nConversion lift estimate, scorecard improvement, confidence level\n\n---\n\nAfter both variants: Recommendation section (which to test first, sequencing, iteration plan, when to re-run scorecard).\n\n---\n\nSave THREE documents to KB:\n1. Variant A — 'LP Optimization Variant A: [biz] — {{responses.lp.traffic_type}} — [date]'\n2. Variant B — 'LP Optimization Variant B: [biz] — {{responses.lp.traffic_type}} — [date]'\n3. Side-by-Side Comparison — create as document artifact\n\nYAML header for each:\ntype: landing-page-ab-variant\nvariant: A (or B)\nlead_type: {{responses.lp.traffic_type}}\nlanding_page_url: [URL]\ncreated_date: [date]\ncurrent_score: [X/100]\ntarget_sections: [priority sections]\nestimated_new_score: [Y/100]"
+        "prompt": "## All Upstream Data\n{{prior_steps.gather-all-upstream.content}}\n\n## Competitive Insights\n{{prior_steps.competitive-scan.content}}\n\n## User Inputs\nURL: {{responses.lp.url}}\nTraffic type: {{responses.lp.traffic_type}}\nTraffic source: {{responses.lp.traffic_source}}\nPage goal: {{responses.lp.goal}}\nReferring message: {{responses.lp.referring_message}}\nVisitor relationship: {{responses.lp.visitor_relationship}}\nPriority sections: {{responses.lp.priority_sections}}\nConstraints: {{responses.lp.optimization_constraints}}\nScore corrections: {{responses.lp.score_corrections}}\n\n## Instructions\n\nGenerate detailed build-out instructions for both variants. For EACH variant:\n\n### Variant [A/B]: [Name]\n\n#### Strategy Summary\n- What this variant changes and why\n- Which scorecard sections this addresses\n- Expected scorecard improvement\n- Expected conversion lift\n- Implementation effort\n- Risk level\n\n#### Message Match Fix (warm traffic)\n- Referring message vs current headline vs new headline\n\n#### Section-by-Section Changes\nFor each section: Current \u2192 Change to (exact copy, visuals, layout, personalization) \u2192 Why\n\n#### Personalization Enhancements (warm traffic)\nName injection, usage data, segment-specific content, conditional logic, pre-filled forms\n\n#### Friction Reduction (warm traffic)\nForm fields to remove/pre-fill, steps to eliminate, one-click paths\n\n#### Implementation Checklist\n[ ] Step-by-step actionable instructions\n\n#### A/B Test Setup\nControl, variant, tool, primary metric, secondary metrics, sample size, duration, significance threshold, winner criteria. For warm: test within warm segment only.\n\n#### Expected Impact\nConversion lift estimate, scorecard improvement, confidence level\n\n---\n\nAfter both variants: Recommendation section (which to test first, sequencing, iteration plan, when to re-run scorecard).\n\n---\n\nSave THREE documents to KB:\n1. Variant A \u2014 'LP Optimization Variant A: [biz] \u2014 {{responses.lp.traffic_type}} \u2014 [date]'\n2. Variant B \u2014 'LP Optimization Variant B: [biz] \u2014 {{responses.lp.traffic_type}} \u2014 [date]'\n3. Side-by-Side Comparison \u2014 create as document artifact\n\nYAML header for each:\ntype: landing-page-ab-variant\nvariant: A (or B)\nlead_type: {{responses.lp.traffic_type}}\nlanding_page_url: [URL]\ncreated_date: [date]\ncurrent_score: [X/100]\ntarget_sections: [priority sections]\nestimated_new_score: [Y/100]"
+      }
+    ]
+  },
+  "validation": {
+    "input_rules": [
+      {
+        "field": "responses.lp.url",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.traffic_type",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.traffic_source",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      },
+      {
+        "field": "responses.lp.goal",
+        "rules": {
+          "required": true,
+          "type": "string"
+        }
+      }
+    ],
+    "output_rules": [
+      {
+        "field": "content",
+        "rules": {
+          "required": true,
+          "min_length": 2000
+        }
+      }
+    ],
+    "quality_checks": [
+      {
+        "id": "two-variants-present",
+        "description": "Verify both Variant A and Variant B are present with specific changes",
+        "prompt": "Verify the output contains both Variant A and Variant B with section-by-section change instructions for each. Each variant should have a strategy summary, specific copy changes, and expected impact. Return PASS if both are present with specific changes, FAIL if either is missing or generic."
+      },
+      {
+        "id": "implementation-checklist",
+        "description": "Verify each variant has an implementation checklist",
+        "prompt": "Verify each variant (A and B) includes an implementation checklist with concrete, actionable steps. Return PASS if both variants have checklists, FAIL if either is missing."
       }
     ]
   }

@@ -1,0 +1,69 @@
+{
+  "agent_id": "lp-cta-optimizer",
+  "test_cases": [
+    {
+      "test_id": "cta-cold",
+      "description": "Cold traffic CTA audit -- tests commitment level calibration (low-friction CTAs for unknown visitors)",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["cta_inventory", "cta_variants", "rhythm_map", "microcopy_recommendations", "competitor_benchmark"],
+        "cta_variants_count": [3, 5],
+        "commitment_level_calibration": true,
+        "each_variant_has": ["cta_text", "placement", "rationale", "commitment_level"]
+      },
+      "output_must_not_contain": [
+        "message_match_cta"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP CTA Recommendations:.*Cold.*Lead.*",
+        "yaml_type": "lp-cta-recommendations",
+        "yaml_fields_present": ["source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "cta-warm",
+      "description": "Warm traffic CTA audit -- tests message-match CTA generation (higher commitment ok for known visitors)",
+      "inputs": {
+        "lp.url": "https://example-crm.com/upgrade-pro",
+        "lp.traffic_type": "Warm -- visitors who already know this brand or are existing customers",
+        "lp.traffic_source": "Email campaign",
+        "lp.goal": "Upgrade to a paid plan or higher tier"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Warm.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer (warm)"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["cta_inventory", "cta_variants", "rhythm_map", "microcopy_recommendations", "competitor_benchmark", "message_match_cta"],
+        "cta_variants_count": [3, 5],
+        "message_match_cta_present": true,
+        "each_variant_has": ["cta_text", "placement", "rationale", "commitment_level"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP CTA Recommendations:.*Warm.*Lead.*",
+        "yaml_type": "lp-cta-recommendations",
+        "yaml_fields_present": ["source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

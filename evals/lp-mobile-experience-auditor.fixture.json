@@ -1,0 +1,67 @@
+{
+  "agent_id": "lp-mobile-experience-auditor",
+  "test_cases": [
+    {
+      "test_id": "mobile-with-layout",
+      "description": "Mobile audit with both scorecard and layout recommendations in KB -- should cross-reference layout section map and CTA rhythm",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          },
+          {
+            "yaml_type": "lp-layout-recommendations",
+            "title_pattern": "LP Layout Recommendations:.*Cold.*",
+            "description": "Layout optimizer output with section map and CTA rhythm"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["mobile_score", "twelve_dimension_audit", "viewport_analysis", "speed_metrics", "in_app_browser_compatibility"],
+        "mobile_score_range": [0, 24],
+        "audit_dimensions": 12,
+        "viewport_count": 3,
+        "references_layout_recs": true
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Mobile Audit:.*Cold.*",
+        "yaml_type": "lp-mobile-recommendations",
+        "yaml_fields_present": ["mobile_score", "main_scorecard_s5_score", "primary_mobile_entry", "platform", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "mobile-standalone",
+      "description": "Mobile audit with no prior analysis in KB -- tests standalone crawl-based mobile assessment",
+      "inputs": {
+        "lp.url": "https://example-ecommerce.com/summer-sale",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+        "lp.goal": "Purchase a product"
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["mobile_score", "twelve_dimension_audit", "viewport_analysis", "speed_metrics", "in_app_browser_compatibility"],
+        "mobile_score_range": [0, 24],
+        "audit_dimensions": 12,
+        "viewport_count": 3
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Mobile Audit:.*Cold.*",
+        "yaml_type": "lp-mobile-recommendations",
+        "yaml_fields_present": ["mobile_score", "primary_mobile_entry", "platform", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

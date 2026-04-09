@@ -1,6 +1,5 @@
 {
   "_comment": "Three agent definitions used by the upsell-advisor CDW workflow. Each corresponds to an 'agent' type step in the workflow.",
-
   "agents": [
     {
       "metadata": {
@@ -9,7 +8,12 @@
         "version": "1.0.0",
         "description": "Scans KB for business data, products, pricing, AOV, and purchase flow. Analyzes checkout URL if provided.",
         "category": "analysis",
-        "tags": ["upsell", "aov", "context", "checkout"],
+        "tags": [
+          "upsell",
+          "aov",
+          "context",
+          "checkout"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -18,18 +22,15 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "checkout-analysis"
       ],
-
       "tools": [
         "search_web",
         "retrieve_reference_content",
         "manage_business_fact",
         "add_file_to_kb"
       ],
-
       "question_sets": [
         {
           "type": "embedded",
@@ -37,7 +38,7 @@
           "questions": [
             {
               "id": "checkout-url",
-              "question": "What is the URL of your checkout page or online store? (optional — we'll analyze it automatically)",
+              "question": "What is the URL of your checkout page or online store? (optional \u2014 we'll analyze it automatically)",
               "responseKey": "checkout.url",
               "format": "url",
               "required": false,
@@ -46,7 +47,6 @@
           ]
         }
       ],
-
       "references": {
         "kb_items": [],
         "searches": [
@@ -54,60 +54,95 @@
             "id": "product-data",
             "strategy": "semantic",
             "query_template": "products pricing catalog offerings",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 5
           },
           {
             "id": "business-metrics",
             "strategy": "semantic",
             "query_template": "average order value revenue transactions AOV",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 3
           },
           {
             "id": "customer-profile",
             "strategy": "semantic",
             "query_template": "customer profile ideal customer persona buying behavior",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 3
           },
           {
             "id": "strategist-report",
             "strategy": "semantic",
             "query_template": "business strategy report analysis",
-            "filters": { "content_type": ["document"], "min_similarity": 0.6 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.6
+            },
             "limit": 2
           }
         ]
       },
-
       "instructions": {
-        "system_prompt": "You are a business analyst gathering context to inform an AOV optimization strategy. Your job is to build a clear, accurate picture of what the user's business sells, to whom, at what price points, and how their purchase flow works.\n\nSearch the knowledge base thoroughly — the Strategist report, onboarding data, and business facts should contain product, pricing, and customer data. Use manage_business_fact to look up key metrics like AOV, revenue, and customer segments.\n\nIf a checkout URL was provided, use search_web to analyze the store and checkout flow. Follow the checkout-analysis skill framework.\n\nYour output must be structured as TWO clearly labeled sections:\n1. **business_summary** — products, pricing tiers, customer segments, current AOV, revenue range, business model\n2. **checkout_analysis** — current purchase flow, platform identified, existing upsell elements (if any), noted opportunities\n\nBe specific and use actual numbers from the data. If data is missing, note what's missing — the user will have a chance to fill gaps in the next step.",
-
+        "system_prompt": "You are a business analyst gathering context to inform an AOV optimization strategy. Your job is to build a clear, accurate picture of what the user's business sells, to whom, at what price points, and how their purchase flow works.\n\nSearch the knowledge base thoroughly \u2014 the Strategist report, onboarding data, and business facts should contain product, pricing, and customer data. Use manage_business_fact to look up key metrics like AOV, revenue, and customer segments.\n\nIf a checkout URL was provided, use search_web to analyze the store and checkout flow. Follow the checkout-analysis skill framework.\n\nYour output must be structured as TWO clearly labeled sections:\n1. **business_summary** \u2014 products, pricing tiers, customer segments, current AOV, revenue range, business model\n2. **checkout_analysis** \u2014 current purchase flow, platform identified, existing upsell elements (if any), noted opportunities\n\nBe specific and use actual numbers from the data. If data is missing, note what's missing \u2014 the user will have a chance to fill gaps in the next step.",
         "processing_steps": [
           {
             "id": "scan-kb",
-            "description": "Search KB for all available business data — products, pricing, metrics, customer profiles",
+            "description": "Search KB for all available business data \u2014 products, pricing, metrics, customer profiles",
             "prompt": "Search the knowledge base for everything related to this organization's products, pricing, customers, and sales metrics.\n\nKB search results:\n{{#each search_results}}\n**{{this.id}}** ({{this.result_count}} results):\n{{#each this.results}}\n- {{this.content_preview}}\n{{/each}}\n{{/each}}\n\nAlso call manage_business_fact to retrieve: aov, revenue, product_catalog, customer_segments, and any other relevant business facts.\n\nSynthesize everything into a structured business summary:\n- What products/services does this business sell?\n- What are the price points and tiers?\n- Who are the typical customers?\n- What is the current AOV?\n- What is the purchase volume / revenue range?\n- What is the business model (subscription, one-time, mixed)?"
           },
           {
             "id": "analyze-checkout",
             "description": "If checkout URL provided, analyze the checkout flow. Otherwise note that checkout info will be collected from user.",
-            "prompt": "Checkout URL provided: {{responses.checkout.url}}\n\nIf a URL was provided:\n- Use search_web to analyze the store's product pages and checkout flow\n- Identify the platform (Shopify, WooCommerce, Stripe, custom)\n- Following the checkout-analysis skill framework, document:\n  - The step-by-step purchase flow\n  - Any existing upsell/cross-sell elements\n  - Obvious opportunities and friction points\n\nIf no URL was provided:\n- Note that checkout details will be collected from the user in the next step\n- Include a placeholder in the checkout_analysis section\n\nCombine with the business summary from the previous step into a complete context document.\n\nSave the full analysis to KB using add_file_to_kb with title: 'Upsell Analysis: Business Context — [date]'",
-            "depends_on": ["scan-kb"]
+            "prompt": "Checkout URL provided: {{responses.checkout.url}}\n\nIf a URL was provided:\n- Use search_web to analyze the store's product pages and checkout flow\n- Identify the platform (Shopify, WooCommerce, Stripe, custom)\n- Following the checkout-analysis skill framework, document:\n  - The step-by-step purchase flow\n  - Any existing upsell/cross-sell elements\n  - Obvious opportunities and friction points\n\nIf no URL was provided:\n- Note that checkout details will be collected from the user in the next step\n- Include a placeholder in the checkout_analysis section\n\nCombine with the business summary from the previous step into a complete context document.\n\nSave the full analysis to KB using add_file_to_kb with title: 'Upsell Analysis: Business Context \u2014 [date]'",
+            "depends_on": [
+              "scan-kb"
+            ]
+          }
+        ]
+      },
+      "validation": {
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 500
+            }
           }
         ]
       }
     },
-
     {
       "metadata": {
         "id": "upsell-competitive-researcher",
         "name": "Upsell Competitive Researcher",
         "version": "1.0.0",
-        "description": "Researches how competitors and industry peers upsell at checkout — case studies, strategies, UI patterns, and conversion data.",
+        "description": "Researches how competitors and industry peers upsell at checkout \u2014 case studies, strategies, UI patterns, and conversion data.",
         "category": "analysis",
-        "tags": ["upsell", "aov", "competitive", "research"],
+        "tags": [
+          "upsell",
+          "aov",
+          "competitive",
+          "research"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -116,18 +151,15 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "upsell-strategies",
         "checkout-analysis"
       ],
-
       "tools": [
         "search_web",
         "add_file_to_kb",
         "manage_business_fact"
       ],
-
       "references": {
         "kb_items": [],
         "searches": [
@@ -135,25 +167,38 @@
             "id": "prior-upsell-research",
             "strategy": "semantic",
             "query_template": "upsell best practices competitive research checkout optimization",
-            "filters": { "content_type": ["document"], "min_similarity": 0.7 },
+            "filters": {
+              "content_type": [
+                "document"
+              ],
+              "min_similarity": 0.7
+            },
             "limit": 2
           }
         ]
       },
-
       "instructions": {
-        "system_prompt": "You are a competitive intelligence researcher specializing in e-commerce checkout optimization and upsell strategies. Your job is to find concrete, actionable examples of how businesses in the user's industry increase AOV.\n\nYou will receive the business context and user corrections from previous steps via input_mapping. Use this to understand the industry, product type, and checkout platform.\n\nIMPORTANT — Freshness: Check KB for existing upsell research. If recent (<30 days based on research_date), reuse it. If stale or missing, conduct fresh research.\n\nFocus on finding SPECIFIC examples — not generic advice. Case studies with numbers, named companies with their approaches, UI screenshots or descriptions of checkout upsell flows.",
-
+        "system_prompt": "You are a competitive intelligence researcher specializing in e-commerce checkout optimization and upsell strategies. Your job is to find concrete, actionable examples of how businesses in the user's industry increase AOV.\n\nYou will receive the business context and user corrections from previous steps via input_mapping. Use this to understand the industry, product type, and checkout platform.\n\nIMPORTANT \u2014 Freshness: Check KB for existing upsell research. If recent (<30 days based on research_date), reuse it. If stale or missing, conduct fresh research.\n\nFocus on finding SPECIFIC examples \u2014 not generic advice. Case studies with numbers, named companies with their approaches, UI screenshots or descriptions of checkout upsell flows.",
         "processing_steps": [
           {
             "id": "research-competitors",
             "description": "Search the web for competitive upsell strategies in the user's industry",
-            "prompt": "Business context: {{input.business_context}}\nUser corrections: {{input.user_corrections}}\nCheckout method: {{input.checkout_method}}\nCheckout details: {{input.checkout_details}}\n\nUsing search_web, research the following:\n\n1. **Direct competitors:** How do companies selling similar products/services upsell at checkout? Look for specific examples with named companies.\n\n2. **Industry best practices:** What upsell patterns work best in this industry/vertical? Search for case studies with actual AOV lift numbers.\n\n3. **Platform-specific strategies:** Given their checkout method ({{input.checkout_method}}), what are the most effective upsell implementations on that platform? Search for app recommendations, plugin suggestions, or custom solutions.\n\n4. **Emerging tactics:** Any new or innovative upsell approaches being used by fast-growing companies in this space?\n\n5. **What to avoid:** Any documented failures or anti-patterns specific to this industry?\n\n## Output Format\n\nStructure your findings as:\n\n### Competitive Landscape\n- Company A: [what they do, how it works, results if known]\n- Company B: [what they do, how it works, results if known]\n- ...\n\n### Proven Strategies for This Industry\n- Strategy 1: [description, evidence, expected impact]\n- Strategy 2: ...\n- Strategy 3: ...\n\n### Platform-Specific Recommendations ({{input.checkout_method}})\n- Tool/app recommendations with specifics\n- Implementation patterns that work on this platform\n\n### Key Takeaways\n- Top 3 insights that should inform our strategy recommendations\n\nSave findings to KB using add_file_to_kb with title: 'Upsell Best Practices: [industry] — [date]'. Include a research_date YAML header."
+            "prompt": "Business context: {{input.business_context}}\nUser corrections: {{input.user_corrections}}\nCheckout method: {{input.checkout_method}}\nCheckout details: {{input.checkout_details}}\n\nUsing search_web, research the following:\n\n1. **Direct competitors:** How do companies selling similar products/services upsell at checkout? Look for specific examples with named companies.\n\n2. **Industry best practices:** What upsell patterns work best in this industry/vertical? Search for case studies with actual AOV lift numbers.\n\n3. **Platform-specific strategies:** Given their checkout method ({{input.checkout_method}}), what are the most effective upsell implementations on that platform? Search for app recommendations, plugin suggestions, or custom solutions.\n\n4. **Emerging tactics:** Any new or innovative upsell approaches being used by fast-growing companies in this space?\n\n5. **What to avoid:** Any documented failures or anti-patterns specific to this industry?\n\n## Output Format\n\nStructure your findings as:\n\n### Competitive Landscape\n- Company A: [what they do, how it works, results if known]\n- Company B: [what they do, how it works, results if known]\n- ...\n\n### Proven Strategies for This Industry\n- Strategy 1: [description, evidence, expected impact]\n- Strategy 2: ...\n- Strategy 3: ...\n\n### Platform-Specific Recommendations ({{input.checkout_method}})\n- Tool/app recommendations with specifics\n- Implementation patterns that work on this platform\n\n### Key Takeaways\n- Top 3 insights that should inform our strategy recommendations\n\nSave findings to KB using add_file_to_kb with title: 'Upsell Best Practices: [industry] \u2014 [date]'. Include a research_date YAML header."
+          }
+        ]
+      },
+      "validation": {
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 500
+            }
           }
         ]
       }
     },
-
     {
       "metadata": {
         "id": "upsell-strategy-deepener",
@@ -161,7 +206,12 @@
         "version": "1.0.0",
         "description": "Takes the user's chosen upsell strategy and produces a detailed, actionable implementation plan with copy, UI recommendations, metrics, and A/B testing plan.",
         "category": "planning",
-        "tags": ["upsell", "aov", "implementation", "strategy"],
+        "tags": [
+          "upsell",
+          "aov",
+          "implementation",
+          "strategy"
+        ],
         "status": "active",
         "config": {
           "timeout": 300000,
@@ -170,28 +220,35 @@
           "output_format": "markdown"
         }
       },
-
       "skills": [
         "upsell-strategies",
         "checkout-analysis",
         "copywriting",
         "marketing-compliance"
       ],
-
       "tools": [
         "add_file_to_kb",
         "create_document_artifact",
         "manage_business_fact"
       ],
-
       "instructions": {
-        "system_prompt": "You are an AOV optimization implementation specialist. The user has chosen one of three upsell strategies. Your job is to turn that choice into a detailed, step-by-step implementation plan they can execute immediately.\n\nYou have copywriting skills for writing the actual upsell copy, and marketing-compliance skills for flagging any regulatory issues.\n\nBe extremely specific. Don't say 'write compelling copy' — write the actual copy. Don't say 'design an attractive layout' — describe the exact layout with dimensions, colors, and placement.\n\nIf the user's industry is regulated (healthcare, financial services, etc.), apply marketing-compliance guidelines and flag anything that needs legal review.",
-
+        "system_prompt": "You are an AOV optimization implementation specialist. The user has chosen one of three upsell strategies. Your job is to turn that choice into a detailed, step-by-step implementation plan they can execute immediately.\n\nYou have copywriting skills for writing the actual upsell copy, and marketing-compliance skills for flagging any regulatory issues.\n\nBe extremely specific. Don't say 'write compelling copy' \u2014 write the actual copy. Don't say 'design an attractive layout' \u2014 describe the exact layout with dimensions, colors, and placement.\n\nIf the user's industry is regulated (healthcare, financial services, etc.), apply marketing-compliance guidelines and flag anything that needs legal review.",
         "processing_steps": [
           {
             "id": "deepen-and-plan",
             "description": "Build a comprehensive implementation plan for the chosen strategy",
-            "prompt": "## Context\n- **Business:** {{input.business_context}}\n- **Checkout method:** {{input.checkout_method}}\n- **Checkout details:** {{input.checkout_details}}\n- **Competitive research:** {{input.competitive_research}}\n- **All strategies presented:** {{input.all_strategies}}\n- **Chosen strategy:** {{input.chosen_strategy}}\n- **User constraints/preferences:** {{input.user_constraints}}\n\n## Instructions\n\nBuild a detailed implementation plan for the chosen strategy. Include ALL of the following:\n\n### 1. Strategy Overview\n- Recap of the chosen strategy and why it fits\n- How it will work in their specific checkout flow\n- Expected AOV lift range with assumptions stated\n\n### 2. Upsell Copy & Messaging\nWrite the ACTUAL copy for each touchpoint:\n- Headline text\n- Body/description text\n- CTA button text\n- Dismiss/decline text\n- Any supporting text (urgency, social proof, savings calculation)\n\nProvide 2-3 copy variants for A/B testing.\n\n### 3. UI/UX Recommendations\n- Exact placement in the checkout flow (which step, where on the page)\n- Visual treatment: size, prominence, colors relative to checkout\n- Mobile vs desktop considerations\n- Animation/timing (immediate vs delayed, slide-in vs static)\n- Wireframe description (position of elements, hierarchy)\n\n### 4. Pricing & Offer Structure\n- Specific pricing for the upsell offer\n- Discount amount or bundle savings (if applicable)\n- Threshold calculation (if threshold-based)\n- Margin analysis — ensure the upsell is profitable\n\n### 5. Platform Implementation Steps\nBased on their checkout method ({{input.checkout_method}}):\n- Specific apps/plugins to install (with names and links)\n- Configuration steps (step-by-step)\n- Custom code needed (if any) — provide the actual code or pseudocode\n- Estimated implementation time\n\n### 6. Metrics & Tracking\n- Primary metric: AOV (before vs target)\n- Secondary metrics: upsell acceptance rate, cart abandonment rate, revenue per visitor\n- How to set up tracking (platform-specific)\n- What 'good' looks like after 30 days\n\n### 7. A/B Testing Plan\n- Control: current checkout (no upsell)\n- Variant A: chosen strategy with copy variant 1\n- Variant B: chosen strategy with copy variant 2\n- Sample size needed for statistical significance\n- How long to run the test (based on their traffic)\n- Decision criteria: when to declare a winner\n\n### 8. Next Steps\n- Numbered checklist the user can follow this week\n- What to do if the test wins\n- What to do if the test loses\n- When to consider adding a second upsell touchpoint\n- Note: 'For a visual mockup of this implementation, run the Checkout Mockup Agent' (V2)\n\n---\n\nSave the complete implementation plan to KB using add_file_to_kb with title: 'Upsell Implementation Plan: [strategy name] — [date]'.\nAlso create a document artifact for the user to reference."
+            "prompt": "## Context\n- **Business:** {{input.business_context}}\n- **Checkout method:** {{input.checkout_method}}\n- **Checkout details:** {{input.checkout_details}}\n- **Competitive research:** {{input.competitive_research}}\n- **All strategies presented:** {{input.all_strategies}}\n- **Chosen strategy:** {{input.chosen_strategy}}\n- **User constraints/preferences:** {{input.user_constraints}}\n\n## Instructions\n\nBuild a detailed implementation plan for the chosen strategy. Include ALL of the following:\n\n### 1. Strategy Overview\n- Recap of the chosen strategy and why it fits\n- How it will work in their specific checkout flow\n- Expected AOV lift range with assumptions stated\n\n### 2. Upsell Copy & Messaging\nWrite the ACTUAL copy for each touchpoint:\n- Headline text\n- Body/description text\n- CTA button text\n- Dismiss/decline text\n- Any supporting text (urgency, social proof, savings calculation)\n\nProvide 2-3 copy variants for A/B testing.\n\n### 3. UI/UX Recommendations\n- Exact placement in the checkout flow (which step, where on the page)\n- Visual treatment: size, prominence, colors relative to checkout\n- Mobile vs desktop considerations\n- Animation/timing (immediate vs delayed, slide-in vs static)\n- Wireframe description (position of elements, hierarchy)\n\n### 4. Pricing & Offer Structure\n- Specific pricing for the upsell offer\n- Discount amount or bundle savings (if applicable)\n- Threshold calculation (if threshold-based)\n- Margin analysis \u2014 ensure the upsell is profitable\n\n### 5. Platform Implementation Steps\nBased on their checkout method ({{input.checkout_method}}):\n- Specific apps/plugins to install (with names and links)\n- Configuration steps (step-by-step)\n- Custom code needed (if any) \u2014 provide the actual code or pseudocode\n- Estimated implementation time\n\n### 6. Metrics & Tracking\n- Primary metric: AOV (before vs target)\n- Secondary metrics: upsell acceptance rate, cart abandonment rate, revenue per visitor\n- How to set up tracking (platform-specific)\n- What 'good' looks like after 30 days\n\n### 7. A/B Testing Plan\n- Control: current checkout (no upsell)\n- Variant A: chosen strategy with copy variant 1\n- Variant B: chosen strategy with copy variant 2\n- Sample size needed for statistical significance\n- How long to run the test (based on their traffic)\n- Decision criteria: when to declare a winner\n\n### 8. Next Steps\n- Numbered checklist the user can follow this week\n- What to do if the test wins\n- What to do if the test loses\n- When to consider adding a second upsell touchpoint\n- Note: 'For a visual mockup of this implementation, run the Checkout Mockup Agent' (V2)\n\n---\n\nSave the complete implementation plan to KB using add_file_to_kb with title: 'Upsell Implementation Plan: [strategy name] \u2014 [date]'.\nAlso create a document artifact for the user to reference."
+          }
+        ]
+      },
+      "validation": {
+        "output_rules": [
+          {
+            "field": "content",
+            "rules": {
+              "required": true,
+              "min_length": 1000
+            }
           }
         ]
       }

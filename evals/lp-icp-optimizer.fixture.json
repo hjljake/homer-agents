@@ -1,0 +1,69 @@
+{
+  "agent_id": "lp-icp-optimizer",
+  "test_cases": [
+    {
+      "test_id": "icp-cold-with-scorecard",
+      "description": "Cold traffic ICP audit with scorecard in KB -- should produce 5-dimension element-by-element audit and rewrites",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["icp_audit", "element_by_element_rewrites", "icp_score"],
+        "icp_score_range": [0, 10],
+        "audit_dimensions": 5,
+        "element_rewrites_present": true
+      },
+      "output_must_not_contain": [
+        "personalization_map"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP ICP Recommendations:.*Cold.*",
+        "yaml_type": "lp-icp-recommendations",
+        "yaml_fields_present": ["icp_score", "source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "icp-warm-with-scorecard",
+      "description": "Warm traffic ICP audit with scorecard -- should produce personalization map for known-visitor segments",
+      "inputs": {
+        "lp.url": "https://example-crm.com/upgrade-pro",
+        "lp.traffic_type": "Warm -- visitors who already know this brand or are existing customers",
+        "lp.traffic_source": "Email campaign",
+        "lp.goal": "Upgrade to a paid plan or higher tier"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Warm.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer (warm)"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["icp_audit", "element_by_element_rewrites", "icp_score", "personalization_map"],
+        "icp_score_range": [0, 10],
+        "audit_dimensions": 5,
+        "personalization_map_present": true
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP ICP Recommendations:.*Warm.*",
+        "yaml_type": "lp-icp-recommendations",
+        "yaml_fields_present": ["icp_score", "source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

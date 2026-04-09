@@ -1,0 +1,81 @@
+{
+  "agent_id": "lp-scorecard-analyzer",
+  "test_cases": [
+    {
+      "test_id": "scorecard-cold-saas",
+      "description": "Cold traffic SaaS landing page scored against cold-lead rubric (hero 30pts, proof 20pts emphasis)",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "output_must_contain": {
+        "sections": ["scorecard_results", "overall_score", "grade", "top_strengths", "top_issues", "priority_fixes", "business_context"],
+        "score_range": [0, 100],
+        "top_strengths_count": 3,
+        "top_issues_count": 3,
+        "priority_fixes_count": [1, 10],
+        "scorecard_sections": ["hero_section", "below_the_fold", "social_proof", "offer_clarity", "mobile_experience", "brand_and_design", "technical_and_trust"]
+      },
+      "output_must_not_contain": [
+        "message_match_assessment"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+        "yaml_type": "lp-scorecard-analysis",
+        "yaml_fields_present": ["score", "grade", "traffic_source", "page_goal", "visitor_relationship", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "scorecard-warm-email",
+      "description": "Warm traffic email campaign page scored against warm-lead rubric (offer 20pts, below-fold 20pts emphasis)",
+      "inputs": {
+        "lp.url": "https://example-crm.com/upgrade-pro",
+        "lp.traffic_type": "Warm -- visitors who already know this brand or are existing customers",
+        "lp.traffic_source": "Email campaign",
+        "lp.goal": "Upgrade to a paid plan or higher tier"
+      },
+      "output_must_contain": {
+        "sections": ["scorecard_results", "overall_score", "grade", "top_strengths", "top_issues", "priority_fixes", "business_context", "message_match_assessment"],
+        "score_range": [0, 100],
+        "top_strengths_count": 3,
+        "top_issues_count": 3,
+        "priority_fixes_count": [1, 10],
+        "scorecard_sections": ["hero_section", "below_the_fold", "social_proof", "offer_clarity", "mobile_experience", "brand_and_design", "technical_and_trust"]
+      },
+      "output_must_not_contain": [],
+      "kb_save_check": {
+        "title_pattern": "LP Scorecard Analysis:.*Warm.*",
+        "yaml_type": "lp-scorecard-analysis",
+        "yaml_fields_present": ["score", "grade", "traffic_source", "page_goal", "visitor_relationship", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "scorecard-cold-ecommerce",
+      "description": "Cold traffic ecommerce product page scored against cold-lead rubric via paid social",
+      "inputs": {
+        "lp.url": "https://example-skincare.com/bundles/starter-kit",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+        "lp.goal": "Purchase a product"
+      },
+      "output_must_contain": {
+        "sections": ["scorecard_results", "overall_score", "grade", "top_strengths", "top_issues", "priority_fixes", "business_context"],
+        "score_range": [0, 100],
+        "top_strengths_count": 3,
+        "top_issues_count": 3,
+        "priority_fixes_count": [1, 10],
+        "scorecard_sections": ["hero_section", "below_the_fold", "social_proof", "offer_clarity", "mobile_experience", "brand_and_design", "technical_and_trust"]
+      },
+      "output_must_not_contain": [
+        "message_match_assessment"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+        "yaml_type": "lp-scorecard-analysis",
+        "yaml_fields_present": ["score", "grade", "traffic_source", "page_goal", "visitor_relationship", "lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}

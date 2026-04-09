@@ -1,0 +1,241 @@
+{
+  "suite_id": "lp-chain-tests",
+  "description": "Inter-agent data flow verification tests for the LP Suite. These tests validate that agents correctly save to KB and consume upstream outputs.",
+  "chain_tests": [
+    {
+      "test_id": "chain-scorecard-kb-save",
+      "description": "Verify scorecard saves to KB with correct YAML structure, type, and all required fields",
+      "steps": [
+        {
+          "agent": "lp-scorecard-analyzer",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "assertions": {
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+              "yaml_type": "lp-scorecard-analysis",
+              "yaml_fields_present": ["score", "grade", "traffic_source", "page_goal", "visitor_relationship", "lead_type", "research_date", "page_url"],
+              "body_sections_present": ["scorecard_results", "overall_score", "top_strengths", "top_issues", "priority_fixes"],
+              "score_is_numeric": true,
+              "grade_is_letter": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "test_id": "chain-scorecard-to-headline",
+      "description": "Run scorecard first, then headline optimizer -- verify headline agent discovers and consumes the scorecard from KB",
+      "steps": [
+        {
+          "agent": "lp-scorecard-analyzer",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "assertions": {
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+              "yaml_type": "lp-scorecard-analysis"
+            }
+          }
+        },
+        {
+          "agent": "lp-headline-optimizer",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "assertions": {
+            "consumed_upstream": {
+              "scorecard_referenced": true,
+              "source_scorecard_date_populated": true
+            },
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Headline Recommendations:.*Cold.*",
+              "yaml_type": "lp-headline-recommendations",
+              "yaml_fields_present": ["source_scorecard_date", "lead_type", "research_date", "page_url"]
+            },
+            "output_references_scorecard_findings": true,
+            "headline_variants_count": [3, 5]
+          }
+        }
+      ]
+    },
+    {
+      "test_id": "chain-ab-degradation-tiers",
+      "description": "Run A/B variant builder with 0, 3, and 7 upstream outputs -- verify degradation behavior changes at each tier",
+      "steps": [
+        {
+          "step_id": "ab-zero-upstream",
+          "agent": "lp-ab-variant-builder",
+          "inputs": {
+            "lp.url": "https://example-startup.com/early-access",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+            "lp.goal": "Sign up for a free trial"
+          },
+          "preconditions": {
+            "kb_documents_present": []
+          },
+          "assertions": {
+            "degradation_mode": "crawl-only",
+            "advisory_to_run_scorecard": true,
+            "variants_still_generated": true,
+            "confidence_level": "low"
+          }
+        },
+        {
+          "step_id": "ab-three-upstream",
+          "agent": "lp-ab-variant-builder",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "preconditions": {
+            "kb_documents_present": [
+              {"yaml_type": "lp-scorecard-analysis"},
+              {"yaml_type": "lp-headline-recommendations"},
+              {"yaml_type": "lp-icp-recommendations"}
+            ]
+          },
+          "assertions": {
+            "degradation_mode": "partial",
+            "upstream_sources_consumed": 3,
+            "lightweight_fills_generated": true,
+            "variants_still_generated": true,
+            "confidence_level": "medium"
+          }
+        },
+        {
+          "step_id": "ab-seven-upstream",
+          "agent": "lp-ab-variant-builder",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "preconditions": {
+            "kb_documents_present": [
+              {"yaml_type": "lp-scorecard-analysis"},
+              {"yaml_type": "lp-headline-recommendations"},
+              {"yaml_type": "lp-icp-recommendations"},
+              {"yaml_type": "lp-layout-recommendations"},
+              {"yaml_type": "lp-cta-recommendations"},
+              {"yaml_type": "lp-social-proof-recommendations"},
+              {"yaml_type": "lp-mobile-recommendations"},
+              {"yaml_type": "funnel-continuity-audit"},
+              {"yaml_type": "lp-copy-draft"}
+            ]
+          },
+          "assertions": {
+            "degradation_mode": "full",
+            "upstream_sources_consumed": 9,
+            "no_lightweight_fills": true,
+            "variants_fully_data_driven": true,
+            "confidence_level": "high",
+            "saves_two_kb_documents": true,
+            "kb_save_check_variant_a": {
+              "title_pattern": "LP Optimization Variant A:.*Cold.*",
+              "yaml_type": "landing-page-ab-variant",
+              "yaml_fields_present": ["variant", "current_score", "estimated_new_score", "target_sections"]
+            },
+            "kb_save_check_variant_b": {
+              "title_pattern": "LP Optimization Variant B:.*Cold.*",
+              "yaml_type": "landing-page-ab-variant",
+              "yaml_fields_present": ["variant", "current_score", "estimated_new_score", "target_sections"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "test_id": "chain-cross-page-isolation",
+      "description": "Scorecard Page A + Scorecard Page B, then Headline Optimizer for Page B -- verify the headline agent consumes Page B scorecard (not Page A)",
+      "steps": [
+        {
+          "step_id": "scorecard-page-a",
+          "agent": "lp-scorecard-analyzer",
+          "inputs": {
+            "lp.url": "https://example-saas.com/demo",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+            "lp.goal": "Book a call or demo"
+          },
+          "assertions": {
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+              "yaml_type": "lp-scorecard-analysis",
+              "yaml_field_values": {
+                "page_url": "https://example-saas.com/demo"
+              }
+            }
+          }
+        },
+        {
+          "step_id": "scorecard-page-b",
+          "agent": "lp-scorecard-analyzer",
+          "inputs": {
+            "lp.url": "https://example-fitness.com/30-day-challenge",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+            "lp.goal": "Sign up for a free trial"
+          },
+          "assertions": {
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+              "yaml_type": "lp-scorecard-analysis",
+              "yaml_field_values": {
+                "page_url": "https://example-fitness.com/30-day-challenge"
+              }
+            }
+          }
+        },
+        {
+          "step_id": "headline-page-b",
+          "agent": "lp-headline-optimizer",
+          "inputs": {
+            "lp.url": "https://example-fitness.com/30-day-challenge",
+            "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+            "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+            "lp.goal": "Sign up for a free trial"
+          },
+          "assertions": {
+            "consumed_upstream": {
+              "scorecard_referenced": true,
+              "scorecard_page_url_matches": "https://example-fitness.com/30-day-challenge",
+              "did_not_consume_page_a_scorecard": true
+            },
+            "kb_document_created": true,
+            "kb_save_check": {
+              "title_pattern": "LP Headline Recommendations:.*Cold.*",
+              "yaml_type": "lp-headline-recommendations",
+              "yaml_fields_present": ["source_scorecard_date", "lead_type", "research_date", "page_url"],
+              "yaml_field_values": {
+                "page_url": "https://example-fitness.com/30-day-challenge"
+              }
+            },
+            "headline_variants_relevant_to_fitness": true,
+            "headline_variants_not_about_saas_demo": true
+          }
+        }
+      ]
+    }
+  ]
+}

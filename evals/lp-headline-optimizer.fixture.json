@@ -1,0 +1,63 @@
+{
+  "agent_id": "lp-headline-optimizer",
+  "test_cases": [
+    {
+      "test_id": "headline-cold-with-scorecard",
+      "description": "Cold traffic headline optimization with scorecard already in KB -- should reference scorecard scores and weaknesses",
+      "inputs": {
+        "lp.url": "https://example-saas.com/demo",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid search (Google Ads, Bing Ads)",
+        "lp.goal": "Book a call or demo"
+      },
+      "preconditions": {
+        "kb_documents_present": [
+          {
+            "yaml_type": "lp-scorecard-analysis",
+            "title_pattern": "LP Scorecard Analysis:.*Cold.*",
+            "description": "Scorecard output from prior run of lp-scorecard-analyzer"
+          }
+        ]
+      },
+      "output_must_contain": {
+        "sections": ["headline_recommendations", "subheadline_recommendations", "projected_scores"],
+        "headline_variants_count": [3, 5],
+        "each_variant_has": ["headline_text", "subheadline_text", "rationale", "projected_lift"]
+      },
+      "output_must_not_contain": [
+        "message_match_assessment"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP Headline Recommendations:.*Cold.*",
+        "yaml_type": "lp-headline-recommendations",
+        "yaml_fields_present": ["source_scorecard_date", "lead_type", "research_date", "page_url"]
+      }
+    },
+    {
+      "test_id": "headline-cold-standalone",
+      "description": "Cold traffic headline optimization with NO scorecard in KB -- tests graceful degradation to crawl-only mode",
+      "inputs": {
+        "lp.url": "https://example-fitness.com/30-day-challenge",
+        "lp.traffic_type": "Cold -- visitors who have never heard of this brand",
+        "lp.traffic_source": "Paid social (Facebook Ads, Instagram Ads, TikTok Ads)",
+        "lp.goal": "Sign up for a free trial"
+      },
+      "preconditions": {
+        "kb_documents_present": []
+      },
+      "output_must_contain": {
+        "sections": ["headline_recommendations", "subheadline_recommendations"],
+        "headline_variants_count": [3, 5],
+        "each_variant_has": ["headline_text", "subheadline_text", "rationale"]
+      },
+      "output_must_not_contain": [
+        "message_match_assessment"
+      ],
+      "kb_save_check": {
+        "title_pattern": "LP Headline Recommendations:.*Cold.*",
+        "yaml_type": "lp-headline-recommendations",
+        "yaml_fields_present": ["lead_type", "research_date", "page_url"]
+      }
+    }
+  ]
+}
